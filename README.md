@@ -1,6 +1,6 @@
 &#xa0;
 
-# ✒️ Tool Nulis Online (Beta)
+# ✒️ Tool Nulis Online (Beta Version)
 
 Generator tulisan tangan otomatis berbasis **HTML5 Canvas** dengan arsitektur kalibrasi zona dinamis. Dibangun murni menggunakan *Vanilla JavaScript* tanpa pustaka pihak ketiga.
 
