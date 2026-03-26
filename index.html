@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nulis Online - Final Edition</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Kalam:wght@400;700&family=Patrick+Hand&family=Indie+Flower&family=Dancing+Script:wght@400;700&family=Gloria+Hallelujah&family=Shadows+Into+Light&family=Rock+Salt&family=Architects+Daughter&display=swap"
+    rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #111009;
+      --panel: #1c1609;
+      --panel2: #251d0c;
+      --border: rgba(210, 165, 80, 0.18);
+      --accent: #d4a44c;
+      --accent2: #f0c97a;
+      --muted: #7a6340;
+      --text: #e8d5b0;
+      --hijau: #4cde4c;
+      --biru: #50b4ff;
+    }
+
+    /* DEKLARASI FONT LOKAL */
+    @font-face {
+      font-family: 'Gloria Hallelujah';
+      src: url('fonts/GloriaHallelujah-Regular.ttf');
+    }
+
+    @font-face {
+      font-family: 'HandwritingCR 2';
+      src: url('fonts/HandwritingCR-2.ttf');
+    }
+
+    @font-face {
+      font-family: 'My Handwriting';
+      src: url('fonts/My_handwriting.ttf');
+    }
+
+    @font-face {
+      font-family: 'My Hands';
+      src: url('fonts/MyHandsareHoldingYou.ttf');
+    }
+
+    @font-face {
+      font-family: 'Shadows Into Light';
+      src: url('fonts/ShadowsIntoLight-Regular.ttf');
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Patrick Hand', sans-serif;
+      font-size: 15px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      height: 50px;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 16px;
+      flex-shrink: 0;
+      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+      z-index: 20;
+    }
+
+    .logo {
+      font-family: 'Dancing Script', cursive;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--accent2);
+    }
+
+    .logo em {
+      color: var(--accent);
+      font-style: normal;
+    }
+
+    .live-pill {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(80, 180, 80, 0.12);
+      border: 1px solid rgba(80, 200, 80, 0.25);
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: 11px;
+      color: #7ee87e;
+    }
+
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #4cde4c;
+      animation: blink 1.4s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0.3
+      }
+    }
+
+    .hdr-right {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .app {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 320px;
+      flex-shrink: 0;
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background: var(--panel2);
+      border-radius: 2px;
+    }
+
+    .sec {
+      border-bottom: 1px solid var(--border);
+      padding: 13px 15px;
+    }
+
+    .sec-title {
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sec-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .field {
+      margin-bottom: 12px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    input[type=text],
+    input[type=number],
+    textarea,
+    select {
+      width: 100%;
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'Patrick Hand', sans-serif;
+      font-size: 14px;
+      border-radius: 7px;
+      padding: 7px 10px;
+      outline: none;
+      transition: border-color .2s;
+      resize: vertical;
+    }
+
+    input[type=text]:focus,
+    input[type=number]:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--accent);
+    }
+
+    textarea {
+      min-height: 80px;
+      line-height: 1.55;
+    }
+
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    input[type=number] {
+      -moz-appearance: textfield;
+      width: 45px;
+      text-align: center;
+      font-family: sans-serif;
+      font-size: 11px;
+      padding: 4px;
+      margin-left: 5px;
+    }
+
+    .font-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+
+    .fc {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 6px;
+      cursor: pointer;
+      background: var(--panel2);
+      transition: all .15s;
+      text-align: center;
+      user-select: none;
+    }
+
+    .fc:hover {
+      border-color: var(--accent);
+    }
+
+    .fc.active {
+      border-color: var(--accent);
+      background: rgba(212, 164, 76, 0.13);
+    }
+
+    .fc .prev {
+      font-size: 19px;
+      line-height: 1.3;
+      color: var(--text);
+    }
+
+    .fc .fn {
+      font-size: 9px;
+      color: var(--muted);
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .upload-zone {
+      border: 1.5px dashed var(--border);
+      border-radius: 9px;
+      padding: 11px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      color: var(--muted);
+      font-size: 12px;
+      transition: all .2s;
+      margin-bottom: 10px;
+    }
+
+    .upload-zone:hover {
+      border-color: var(--accent);
+      color: var(--accent2);
+    }
+
+    .upload-zone input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .upload-zone .ic {
+      font-size: 18px;
+      margin-bottom: 3px;
+    }
+
+    .color-row {
+      display: flex;
+      gap: 7px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .cdot {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all .15s;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .cdot:hover {
+      transform: scale(1.15);
+    }
+
+    .cdot.active {
+      border-color: var(--accent2);
+      box-shadow: 0 0 0 2px rgba(240, 201, 122, .4);
+    }
+
+    .cpicker {
+      width: 26px;
+      height: 26px;
+      padding: 0;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      background: conic-gradient(red, yellow, lime, cyan, blue, magenta, red);
+    }
+
+    .cpicker::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    .cpicker::-webkit-color-swatch {
+      border: 2px solid #fff;
+      border-radius: 50%;
+    }
+
+    .sl-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    input[type=range] {
+      flex: 1;
+      accent-color: var(--accent);
+      background: transparent;
+      border: none;
+      padding: 0;
+    }
+
+    .dl-btn {
+      width: 100%;
+      padding: 11px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #1a0f00;
+      border: none;
+      border-radius: 9px;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all .2s;
+      box-shadow: 0 3px 14px rgba(212, 164, 76, .3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+    }
+
+    .dl-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 22px rgba(212, 164, 76, .5);
+    }
+
+    .btn-kalibrasi {
+      background: #4cde4c;
+      color: #000;
+      box-shadow: 0 3px 14px rgba(76, 222, 76, 0.2);
+    }
+
+    .btn-kalibrasi:disabled {
+      background: #333;
+      color: #666;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    #panelNavKalibrasi {
+      display: none;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px dashed var(--biru);
+      padding: 10px;
+      border-radius: 7px;
+      margin-top: 10px;
+    }
+
+    .nav-grup {
+      display: flex;
+      gap: 5px;
+      margin-top: 10px;
+    }
+
+    .btn-nav {
+      flex: 1;
+      padding: 8px;
+      background: #333;
+      color: #fff;
+      border: 1px solid #555;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 11px;
+      transition: 0.2s;
+    }
+
+    .btn-nav:hover {
+      background: #444;
+    }
+
+    .btn-nav.aktif {
+      background: var(--biru);
+      color: #000;
+      border-color: var(--biru);
+      font-weight: bold;
+    }
+
+    .btn-nav:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-selesai {
+      background: var(--hijau);
+      color: #000;
+      font-weight: bold;
+    }
+
+    #teksPetunjuk {
+      font-size: 12px;
+      font-weight: bold;
+      color: var(--biru);
+      text-align: center;
+      margin-bottom: 5px;
+      line-height: 1.4;
+    }
+
+    .panel-presisi {
+      background: var(--panel2);
+      padding: 12px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      margin-bottom: 10px;
+    }
+
+    .canvas-wrap {
+      flex: 1;
+      overflow: auto;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 30px 20px 60px;
+      background: radial-gradient(ellipse at 50% 20%, #1f1508 0%, #070501 100%);
+    }
+
+    .canvas-wrap::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    .canvas-wrap::-webkit-scrollbar-thumb {
+      background: #251a08;
+      border-radius: 3px;
+    }
+
+    #myCanvas {
+      display: block;
+      border-radius: 2px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, .75), 0 0 0 1px rgba(255, 255, 255, .04);
+      transition: cursor 0.2s;
+
+      max-width: 100%;
+      max-height: 85vh;
+      object-fit: contain;
+    }
+
+    #myCanvas.mode-ukur {
+      cursor: crosshair;
+    }
+
+    /* --- DESAIN KHUSUS TOMBOL ZOOM --- */
+    .zoom-grup {
+      display: flex;
+      gap: 5px;
+      margin-top: 5px;
+    }
+
+    .zoom-btn {
+      flex: 1;
+      padding: 7px;
+      background: var(--panel2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: bold;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .zoom-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent2);
+    }
+
+    .zoom-label {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(212, 164, 76, 0.1);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    #myCanvas {
+      transition: width 0.2s ease-out;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="logo">✒ Nulis<em>Online</em> <span style="font-size: 17px;">by emow</span></div>
+    <div class="live-pill">
+      <div class="live-dot"></div>LIVE PREVIEW
+    </div>
+    <div class="hdr-right" id="hdrInfo">300×447 · 2×</div>
+  </header>
+
+  <div class="app">
+    <aside class="sidebar">
+
+      <div class="sec">
+        <div class="sec-title">✏ Konten Utama</div>
+        <div class="field"><label>Header Kiri (Multi-baris)</label>
+          <textarea id="inputHeaderKiri">Nama: Emowmow&#10;NIM: 12345678&#10;Prodi: Teknik Informatika</textarea>
+        </div>
+        <div class="field"><label>Header Kanan (Tanggal)</label>
+          <textarea id="inputHeaderKanan" style="min-height:40px;">26 Maret 2026</textarea>
+        </div>
+        <div class="field"><label>Isi Tulisan</label>
+          <textarea id="inputKonten" style="min-height: 120px;">Lorem ipsum dolor sit amet consectetur adipisicing elit.
+    Ex quod corrupti, aperiam deserunt dicta autem ipsam cum commodi nihil itaque!</textarea>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">🔤 Font & Tinta</div>
+        <div class="font-grid" id="fontGrid"></div>
+
+        <div class="upload-zone">
+          <div class="ic">📎</div> Upload Font Sendiri (.ttf)
+          <input type="file" accept=".ttf,.otf" onchange="prosesUnggahFont(event)">
+        </div>
+        <div id="labelFontKustom"
+          style="font-size:11px; color:var(--accent2); display:none; text-align:center; margin-bottom:10px;"></div>
+
+        <div class="field"><label>Warna Tinta</label>
+          <div class="color-row" id="colorRow"></div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">⚙ Kalibrasi Kertas (Wizard)</div>
+
+        <label style="margin-bottom: 5px;">1. Pilih Kertas Tersedia:</label>
+        <div class="font-grid" id="wadahKertasLokal" style="margin-bottom: 10px;"></div>
+
+        <div class="upload-zone" style="border-color:var(--accent); color:var(--accent);">
+          <div class="ic">🖼</div> 2. Atau Unggah Kertas Custom (.jpg)
+          <input type="file" accept="image/jpeg,image/png" id="inputKertas" onchange="prosesUnggahKertas(event)">
+        </div>
+
+        <button class="dl-btn btn-kalibrasi" id="btnMulaiKalibrasi" onclick="mulaiModeKalibrasi()" disabled>📐 3. Mulai
+          Kalibrasi Area</button>
+
+        <div id="panelNavKalibrasi">
+          <div id="teksPetunjuk">Klik batas Kiri...</div>
+          <div class="nav-grup">
+            <button class="btn-nav" id="btnPrev" onclick="navigasiKalibrasi(-1)">◄ Sblm</button>
+            <button class="btn-nav aktif" id="btnNext" onclick="navigasiKalibrasi(1)">Lanjut ►</button>
+          </div>
+          <button class="btn-nav btn-selesai" id="btnSelesaiKalibrasi" onclick="selesaiKalibrasi()"
+            style="width: 100%; margin-top: 5px; display: none;">Selesai & Simpan ✅</button>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">🎚 Presisi Manual (Y-Offset)</div>
+        <div class="panel-presisi">
+          <div class="field"><label>Geser Y: Header Kiri</label>
+            <div class="sl-row">
+              <input type="range" id="geserY_Kiri" min="-100" max="100" value="0"
+                oninput="sinkronInput('geserY_Kiri', 'angkaY_Kiri')">
+              <input type="number" id="angkaY_Kiri" value="0" oninput="sinkronInput('angkaY_Kiri', 'geserY_Kiri')">
+            </div>
+          </div>
+          <div class="field"><label>Geser Y: Header Kanan</label>
+            <div class="sl-row">
+              <input type="range" id="geserY_Kanan" min="-100" max="100" value="0"
+                oninput="sinkronInput('geserY_Kanan', 'angkaY_Kanan')">
+              <input type="number" id="angkaY_Kanan" value="0" oninput="sinkronInput('angkaY_Kanan', 'geserY_Kanan')">
+            </div>
+          </div>
+          <div class="field"><label>Geser Y: Konten Utama</label>
+            <div class="sl-row">
+              <input type="range" id="geserY_Konten" min="-100" max="100" value="0"
+                oninput="sinkronInput('geserY_Konten', 'angkaY_Konten')">
+              <input type="number" id="angkaY_Konten" value="0"
+                oninput="sinkronInput('angkaY_Konten', 'geserY_Konten')">
+            </div>
+          </div>
+          <div class="field"><label>Ukuran Font Umum</label>
+            <div class="sl-row">
+              <input type="range" id="geserUkuranFont" min="1" max="100" value="20"
+                oninput="sinkronInput('geserUkuranFont', 'angkaUkuranFont')">
+              <input type="number" id="angkaUkuranFont" value="20"
+                oninput="sinkronInput('angkaUkuranFont', 'geserUkuranFont')">
+            </div>
+          </div>
+          <div class="field"><label>Koreksi Jarak Baris (Spasi)</label>
+            <div class="sl-row">
+              <input type="range" id="geserSpasi" min="-10" max="10" step="0.1" value="0"
+                oninput="sinkronInput('geserSpasi', 'angkaSpasi')">
+              <input type="number" id="angkaSpasi" value="0" step="0.1"
+                oninput="sinkronInput('angkaSpasi', 'geserSpasi')">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">📐 Resolusi Kanvas</div>
+        <div class="field"><label>Preset Kertas</label>
+          <select id="pilihanPreset" onchange="terapkanPreset()">
+            <option value="300x447">Folio (300×447)</option>
+            <option value="595x842">A4 (595×842)</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:6px" class="field">
+          <div style="flex:1"><label>Lebar</label><input type="number" id="inputLebar" value="300"
+              oninput="bangunUlangKanvas()"></div>
+          <div style="flex:1"><label>Tinggi</label><input type="number" id="inputTinggi" value="447"
+              oninput="bangunUlangKanvas()"></div>
+        </div>
+        <div class="field"><label>Kualitas Resolusi (Skala)</label>
+          <div class="sl-row">
+            <input type="range" id="geserSkala" min="1" max="4" step="1" value="2"
+              oninput="sinkronInput('geserSkala', 'angkaSkala'); bangunUlangKanvas()">
+            <input type="number" id="angkaSkala" value="2" min="1" max="4"
+              oninput="sinkronInput('angkaSkala', 'geserSkala'); bangunUlangKanvas()">
+          </div>
+        </div>
+        <div class="field" style="margin-top: 15px;">
+          <label>Zoom Preview Kanvas</label>
+          <div class="zoom-grup">
+            <button class="zoom-btn" onclick="ubahZoom(-0.25)">➖ Out</button>
+            <div id="labelZoom" class="zoom-label">100%</div>
+            <button class="zoom-btn" onclick="ubahZoom(0.25)">➕ In</button>
+            <button class="zoom-btn" onclick="ubahZoom(0, true)">Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <button class="dl-btn" onclick="unduhGambar()">⬇ Simpan Hasil (.png)</button>
+      </div>
+
+    </aside>
+
+    <div class="canvas-wrap">
+      <canvas id="myCanvas"></canvas>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // LOGIKA MESIN V8 (JavaScript Engine)
+    // ==========================================
+
+    const elemenKanvas = document.getElementById('myCanvas');
+    const konteks = elemenKanvas.getContext('2d');
+    let animasiFrame = null;
+
+    const DAFTAR_FONT = [
+      { id: 'gloria', nama: 'Gloria', keluarga: 'Gloria Hallelujah' },
+      { id: 'hwcr2', nama: 'HW CR-2', keluarga: 'HandwritingCR 2' },
+      { id: 'myhand', nama: 'My Hand', keluarga: 'My Handwriting' },
+      { id: 'myhands2', nama: 'Holding You', keluarga: 'My Hands' },
+      { id: 'shadows', nama: 'Shadows', keluarga: 'Shadows Into Light' },
+      { id: 'patrick', nama: 'Patrick Hand', keluarga: 'Patrick Hand' }
+    ];
+
+    const DAFTAR_KERTAS_LOKAL = [
+      { id: 'buku1', nama: 'Buku 1', path: 'img/buku1.jpg' },
+      { id: 'folio1', nama: 'Folio 1', path: 'img/folio1.jpg' },
+      { id: 'folio2', nama: 'Folio 2', path: 'img/folio2.png' },
+      { id: 'folio3', nama: 'Folio 3', path: 'img/folio3.png' }
+    ];
+
+    const TINTA_PRESET = [
+      { id: 'hitam', hex: '#1a1209' },
+      { id: 'biru', hex: '#1b3a7a' },
+      { id: 'merah', hex: '#8b1a1a' }
+    ];
+
+    const Status = {
+      gambarKertas: null,
+      modeAplikasi: 'tulis',
+      hexTinta: '#1a1209',
+      keluargaFont: 'Patrick Hand',
+      fontKustom: null,
+
+      kalibrasi: {
+        headerKiri: { marginKiri: 44, batasKanan: 250, awalY: 60, yKedua: 92 },
+        headerKanan: { marginKiri: 400, batasKanan: 550, awalY: 60, yKedua: 92 },
+        konten: { marginKiri: 44, batasKanan: 550, awalY: 150, yKedua: 182 }
+      }
+    };
+
+    const PetaKalibrasi = [
+      { id: 0, zona: 'headerKiri', prop: 'marginKiri', tipe: 'X', nama: '<b>[Header Kiri]</b><br>1. Klik Batas KIRI' },
+      { id: 1, zona: 'headerKiri', prop: 'batasKanan', tipe: 'X', nama: '<b>[Header Kiri]</b><br>2. Klik Batas KANAN' },
+      { id: 2, zona: 'headerKiri', prop: 'awalY', tipe: 'Y', nama: '<b>[Header Kiri]</b><br>3. Klik GARIS 1 (Atas)' },
+      { id: 3, zona: 'headerKiri', prop: 'yKedua', tipe: 'Y', nama: '<b>[Header Kiri]</b><br>4. Klik GARIS 2 (Bawah)' },
+
+      { id: 4, zona: 'headerKanan', prop: 'marginKiri', tipe: 'X', nama: '<b>[Header Kanan]</b><br>5. Klik Batas KIRI' },
+      { id: 5, zona: 'headerKanan', prop: 'batasKanan', tipe: 'X', nama: '<b>[Header Kanan]</b><br>6. Klik Batas KANAN' },
+      { id: 6, zona: 'headerKanan', prop: 'awalY', tipe: 'Y', nama: '<b>[Header Kanan]</b><br>7. Klik GARIS 1 (Atas)' },
+      { id: 7, zona: 'headerKanan', prop: 'yKedua', tipe: 'Y', nama: '<b>[Header Kanan]</b><br>8. Klik GARIS 2 (Bawah)' },
+
+      { id: 8, zona: 'konten', prop: 'marginKiri', tipe: 'X', nama: '<b>[Konten Utama]</b><br>9. Klik Batas KIRI' },
+      { id: 9, zona: 'konten', prop: 'batasKanan', tipe: 'X', nama: '<b>[Konten Utama]</b><br>10. Klik Batas KANAN' },
+      { id: 10, zona: 'konten', prop: 'awalY', tipe: 'Y', nama: '<b>[Konten Utama]</b><br>11. Klik GARIS 1 (Atas)' },
+      { id: 11, zona: 'konten', prop: 'yKedua', tipe: 'Y', nama: '<b>[Konten Utama]</b><br>12. Klik GARIS 2 (Bawah)' }
+    ];
+    let langkahAktif = 0;
+
+    // --- INISIALISASI UI ---
+    function inisialisasiUI() {
+      // 1. Render Font Lokal
+      const fontGrid = document.getElementById('fontGrid');
+      DAFTAR_FONT.forEach(f => {
+        const div = document.createElement('div');
+        div.className = 'fc' + (f.id === 'patrick' ? ' active' : '');
+        div.innerHTML = `<div class="prev" style="font-family:'${f.keluarga}',cursive">Halo</div><div class="fn">${f.nama}</div>`;
+        div.onclick = () => { Status.keluargaFont = f.keluarga; Status.fontKustom = null; document.querySelectorAll('.fc').forEach(c => c.classList.remove('active')); div.classList.add('active'); jadwalkanGambarUlang(); };
+        fontGrid.appendChild(div);
+      });
+
+      // 2. Render Kertas Lokal
+      const wadahKertas = document.getElementById('wadahKertasLokal');
+      DAFTAR_KERTAS_LOKAL.forEach(kertas => {
+        const div = document.createElement('div');
+        div.className = 'fc';
+        div.innerHTML = `<div style="font-size:12px; font-weight:bold; padding: 5px;">${kertas.nama}</div>`;
+        div.onclick = () => {
+          document.querySelectorAll('#wadahKertasLokal .fc').forEach(c => c.classList.remove('active'));
+          div.classList.add('active');
+          const gambarBaru = new Image();
+          gambarBaru.onload = function () {
+            Status.gambarKertas = gambarBaru;
+            document.getElementById('inputLebar').value = gambarBaru.width;
+            document.getElementById('inputTinggi').value = gambarBaru.height;
+            bangunUlangKanvas();
+            document.getElementById('btnMulaiKalibrasi').disabled = false;
+          };
+          gambarBaru.src = kertas.path;
+        };
+        wadahKertas.appendChild(div);
+      });
+
+      // 3. Render Warna
+      const colorRow = document.getElementById('colorRow');
+      TINTA_PRESET.forEach((t, i) => {
+        const div = document.createElement('div');
+        div.className = 'cdot' + (i === 0 ? ' active' : '');
+        div.style.background = t.hex;
+        div.title = t.label;
+        div.onclick = () => { setWarna(t.hex, div); };
+        colorRow.appendChild(div);
+      });
+
+      const inputCustom = document.createElement('input');
+      inputCustom.type = 'color';
+      inputCustom.className = 'cdot cpicker';
+      inputCustom.title = "Pilih Warna Sendiri";
+      inputCustom.oninput = (e) => { setWarna(e.target.value, inputCustom); };
+      colorRow.appendChild(inputCustom);
+    }
+
+    function setWarna(kodeHex, elemenTarget) {
+      Status.hexTinta = kodeHex;
+      document.querySelectorAll('.cdot').forEach(d => d.classList.remove('active'));
+      elemenTarget.classList.add('active');
+      jadwalkanGambarUlang();
+    }
+
+    function sinkronInput(idSumber, idTarget) {
+      document.getElementById(idTarget).value = document.getElementById(idSumber).value;
+      jadwalkanGambarUlang();
+    }
+
+    async function prosesUnggahFont(e) {
+      const file = e.target.files[0]; if (!file) return;
+      const bufferArray = await file.arrayBuffer();
+      const namaUnik = 'FontKustom_' + Date.now();
+      try {
+        const fontBaru = new FontFace(namaUnik, bufferArray);
+        await fontBaru.load();
+        document.fonts.add(fontBaru);
+        Status.fontKustom = namaUnik;
+        document.querySelectorAll('.fc').forEach(c => c.classList.remove('active'));
+        document.getElementById('labelFontKustom').style.display = 'block';
+        document.getElementById('labelFontKustom').textContent = '✅ ' + file.name;
+        jadwalkanGambarUlang();
+      } catch (error) { alert('Gagal memuat font.'); }
+    }
+
+    function terapkanPreset() {
+      const [l, t] = document.getElementById('pilihanPreset').value.split('x').map(Number);
+      document.getElementById('inputLebar').value = l;
+      document.getElementById('inputTinggi').value = t;
+      bangunUlangKanvas();
+    }
+
+    // --- RENDERING KANVAS ---
+    function bangunUlangKanvas() {
+      const skala = parseInt(document.getElementById('angkaSkala').value) || 2;
+      const lebar = parseInt(document.getElementById('inputLebar').value) || 300;
+      const tinggi = parseInt(document.getElementById('inputTinggi').value) || 447;
+
+      elemenKanvas.width = lebar * skala;
+      elemenKanvas.height = tinggi * skala;
+
+      document.getElementById('hdrInfo').textContent = `${lebar}×${tinggi} · ${skala}×`;
+      jadwalkanGambarUlang();
+    }
+
+    function jadwalkanGambarUlang() {
+      if (animasiFrame) cancelAnimationFrame(animasiFrame);
+      animasiFrame = requestAnimationFrame(eksekusiGambar);
+    }
+
+    function eksekusiGambar() {
+      const skalaTeks = parseInt(document.getElementById('angkaSkala').value) || 2;
+      konteks.clearRect(0, 0, elemenKanvas.width, elemenKanvas.height);
+
+      if (Status.gambarKertas) {
+        konteks.drawImage(Status.gambarKertas, 0, 0, elemenKanvas.width, elemenKanvas.height);
+      } else {
+        konteks.fillStyle = '#fdf6e3';
+        konteks.fillRect(0, 0, elemenKanvas.width, elemenKanvas.height);
+        konteks.strokeStyle = `rgba(170,195,230,0.55)`;
+        konteks.lineWidth = skalaTeks * 0.7;
+        for (let y = 58 * skalaTeks; y < elemenKanvas.height; y += 32 * skalaTeks) {
+          konteks.beginPath(); konteks.moveTo(0, y); konteks.lineTo(elemenKanvas.width, y); konteks.stroke();
+        }
+      }
+
+      if (Status.modeAplikasi === 'tulis') {
+        renderZona('headerKiri', document.getElementById('inputHeaderKiri').value, skalaTeks);
+        renderZona('headerKanan', document.getElementById('inputHeaderKanan').value, skalaTeks);
+        renderZona('konten', document.getElementById('inputKonten').value, skalaTeks);
+      } else if (Status.modeAplikasi === 'kalibrasi') {
+        renderGarisKalibrasi();
+      }
+    }
+
+    function renderZona(namaZona, teksInput, Skala) {
+      if (!teksInput) return;
+
+      const konfigurasi = Status.kalibrasi[namaZona];
+      const fontAktif = Status.fontKustom || Status.keluargaFont;
+      const ukuranFont = (parseInt(document.getElementById('angkaUkuranFont').value) || 20) * Skala;
+
+      const inputIdY = namaZona === 'headerKiri' ? 'angkaY_Kiri' : namaZona === 'headerKanan' ? 'angkaY_Kanan' : 'angkaY_Konten';
+      const geserManualY = (parseInt(document.getElementById(inputIdY).value) || 0) * Skala;
+
+      // Ambil nilai koreksi spasi, lalu kalikan dengan resolusi (Skala)
+      const koreksiSpasi = (parseFloat(document.getElementById('angkaSpasi').value) || 0) * Skala;
+
+      // Jarak baris akhir adalah hasil kalibrasi klik ditambah koreksi manual
+      const jarakBaris = (konfigurasi.yKedua - konfigurasi.awalY) + koreksiSpasi;
+
+      const hex = Status.hexTinta;
+      const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+
+      konteks.font = `${ukuranFont}px '${fontAktif}', cursive`;
+      konteks.fillStyle = `rgba(${r}, ${g}, ${b}, 0.88)`;
+      konteks.textBaseline = 'bottom';
+
+      let posisiY = konfigurasi.awalY + geserManualY;
+      const batasLebar = konfigurasi.batasKanan - konfigurasi.marginKiri;
+
+      teksInput.split('\n').forEach(paragraf => {
+        if (!paragraf.trim() && paragraf.length === 0) { posisiY += jarakBaris; return; }
+
+        const kecocokanSpasi = paragraf.match(/^\s*/);
+        const spasiAwal = kecocokanSpasi ? kecocokanSpasi[0] : "";
+        const kataKata = paragraf.trimStart().split(' ');
+
+        let barisSaatIni = spasiAwal + (kataKata[0] || "");
+
+        for (let i = 1; i < kataKata.length; i++) {
+          let kata = kataKata[i];
+          const tesBaris = barisSaatIni + ' ' + kata;
+
+          if (konteks.measureText(tesBaris).width > batasLebar && barisSaatIni.trim() !== '') {
+            let acakY = (Math.random() - 0.5) * (3 * Skala);
+            konteks.fillText(barisSaatIni, konfigurasi.marginKiri, posisiY + acakY);
+            posisiY += jarakBaris;
+            barisSaatIni = kata;
+          } else {
+            barisSaatIni = tesBaris;
+          }
+        }
+
+        if (barisSaatIni) {
+          let acakY = (Math.random() - 0.5) * (3 * Skala);
+          konteks.fillText(barisSaatIni, konfigurasi.marginKiri, posisiY + acakY);
+          posisiY += jarakBaris;
+        }
+      });
+    }
+
+    // --- MESIN WIZARD KALIBRASI ---
+    function prosesUnggahKertas(e) {
+      const file = e.target.files[0]; if (!file) return;
+      const pembaca = new FileReader();
+      pembaca.onload = function (event) {
+        const gambar = new Image();
+        gambar.onload = function () {
+          Status.gambarKertas = gambar;
+          // Hapus pilihan kertas lokal jika pengguna upload custom
+          document.querySelectorAll('#wadahKertasLokal .fc').forEach(c => c.classList.remove('active'));
+
+          // --- LOGIKA BARU: AUTO DOWNSCALE (PEMBATAS RESOLUSI) ---
+          const BATAS_LEBAR_MAKSIMAL = 960; // Lebar standar yang aman untuk performa dan kalibrasi
+          let lebarAkhir = gambar.width;
+          let tinggiAkhir = gambar.height;
+
+          // Jika gambar terlalu raksasa, kecilkan secara proporsional
+          if (gambar.width > BATAS_LEBAR_MAKSIMAL) {
+            const rasio = gambar.width / gambar.height;
+            lebarAkhir = BATAS_LEBAR_MAKSIMAL;
+            tinggiAkhir = Math.round(BATAS_LEBAR_MAKSIMAL / rasio);
+          }
+
+          document.getElementById('inputLebar').value = lebarAkhir;
+          document.getElementById('inputTinggi').value = tinggiAkhir;
+
+          bangunUlangKanvas();
+          document.getElementById('btnMulaiKalibrasi').disabled = false;
+        }
+        gambar.src = event.target.result;
+      }
+      pembaca.readAsDataURL(file);
+    }
+
+    function mulaiModeKalibrasi() {
+      Status.modeAplikasi = 'kalibrasi';
+      elemenKanvas.classList.add('mode-ukur');
+      document.getElementById('panelNavKalibrasi').style.display = 'block';
+
+      langkahAktif = 0;
+      perbaruiUINavigasi();
+      jadwalkanGambarUlang();
+    }
+
+    function navigasiKalibrasi(arah) {
+      langkahAktif += arah;
+      if (langkahAktif < 0) langkahAktif = 0;
+      if (langkahAktif > 11) langkahAktif = 11;
+      perbaruiUINavigasi();
+      jadwalkanGambarUlang();
+    }
+
+    function perbaruiUINavigasi() {
+      const stepData = PetaKalibrasi[langkahAktif];
+      document.getElementById('teksPetunjuk').innerHTML = stepData.nama;
+      document.getElementById('btnPrev').disabled = (langkahAktif === 0);
+
+      if (langkahAktif === 11 && Status.kalibrasi.konten.yKedua !== undefined && Status.kalibrasi.konten.yKedua !== null) {
+        document.getElementById('btnNext').style.display = 'none';
+        document.getElementById('btnSelesaiKalibrasi').style.display = 'block';
+      } else {
+        document.getElementById('btnNext').style.display = 'block';
+        document.getElementById('btnSelesaiKalibrasi').style.display = 'none';
+      }
+    }
+
+    function selesaiKalibrasi() {
+      Status.modeAplikasi = 'tulis';
+      elemenKanvas.classList.remove('mode-ukur');
+      document.getElementById('panelNavKalibrasi').style.display = 'none';
+      alert("Penyimpanan Kalibrasi Berhasil!");
+      jadwalkanGambarUlang();
+    }
+
+    elemenKanvas.addEventListener('mousedown', function (kejadian) {
+      if (Status.modeAplikasi !== 'kalibrasi') return;
+
+      const batasKanvas = elemenKanvas.getBoundingClientRect();
+      const rasioX = elemenKanvas.width / batasKanvas.width;
+      const rasioY = elemenKanvas.height / batasKanvas.height;
+      const klikX = (kejadian.clientX - batasKanvas.left) * rasioX;
+      const klikY = (kejadian.clientY - batasKanvas.top) * rasioY;
+
+      const stepData = PetaKalibrasi[langkahAktif];
+      const zona = Status.kalibrasi[stepData.zona];
+
+      if (stepData.tipe === 'X') { zona[stepData.prop] = klikX; }
+      else { zona[stepData.prop] = klikY; }
+
+      if (langkahAktif < 11) {
+        navigasiKalibrasi(1);
+      } else {
+        perbaruiUINavigasi();
+        jadwalkanGambarUlang();
+      }
+    });
+
+    function renderGarisKalibrasi() {
+      konteks.lineWidth = 3;
+      PetaKalibrasi.forEach((step, index) => {
+        if (index > langkahAktif) return;
+
+        const nilai = Status.kalibrasi[step.zona][step.prop];
+        if (nilai === null || nilai === undefined) return;
+
+        konteks.beginPath();
+        const warnaGaris = (index === langkahAktif) ? '#ffea00' : (step.tipe === 'X' ? 'rgba(255, 0, 0, 0.5)' : 'rgba(0, 150, 255, 0.5)');
+        konteks.strokeStyle = warnaGaris;
+
+        if (step.tipe === 'X') {
+          konteks.moveTo(nilai, 0); konteks.lineTo(nilai, elemenKanvas.height);
+        } else {
+          konteks.moveTo(0, nilai); konteks.lineTo(elemenKanvas.width, nilai);
+        }
+        konteks.stroke();
+      });
+    }
+
+    // --- BINDING EVENT INPUT & TAB ---
+    ['inputHeaderKiri', 'inputHeaderKanan', 'inputKonten'].forEach(id => {
+      document.getElementById(id).addEventListener('input', jadwalkanGambarUlang);
+      document.getElementById(id).addEventListener('keydown', function (e) {
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          document.execCommand('insertText', false, '    ');
+          jadwalkanGambarUlang();
+        }
+      });
+    });
+
+    function unduhGambar() {
+      if (Status.modeAplikasi !== 'tulis') {
+        alert("Selesaikan kalibrasi terlebih dahulu!"); return;
+      }
+      if (!Status.gambarKertas) {
+        alert("Pilih atau unggah kertas terlebih dahulu."); return;
+      }
+      const tautan = document.createElement('a');
+      tautan.download = `BotNulis_${new Date().getTime()}.png`;
+      tautan.href = elemenKanvas.toDataURL('image/png');
+      tautan.click();
+    }
+
+    // Jalankan saat pertama kali dimuat
+    window.onload = () => {
+      inisialisasiUI();
+      document.fonts.ready.then(() => bangunUlangKanvas());
+    };
+
+    // ── LOGIKA ZOOM PREVIEW ──
+    let tingkatZoom = 1.0;
+    let lebarVisualDasar = 0; // Variabel baru untuk merekam ukuran tampilan di layar
+
+    function ubahZoom(delta, reset = false) {
+      // 1. Tangkap ukuran visual aktual saat kanvas berada di posisi 100%
+      if (tingkatZoom === 1.0 || reset) {
+        // Pastikan kanvas dalam mode responsif bawaan CSS sebelum diukur
+        elemenKanvas.style.maxWidth = '100%';
+        elemenKanvas.style.maxHeight = '85vh';
+        elemenKanvas.style.width = 'auto';
+        elemenKanvas.style.height = 'auto';
+
+        // Merekam ukuran piksel fisik yang sedang ditampilkan di monitor Anda
+        lebarVisualDasar = elemenKanvas.clientWidth;
+      }
+
+      // 2. Kalkulasi multiplier zoom
+      if (reset) {
+        tingkatZoom = 1.0;
+      } else {
+        tingkatZoom += delta;
+        if (tingkatZoom < 0.5) tingkatZoom = 0.5; // Batas minimal 50%
+        if (tingkatZoom > 4.0) tingkatZoom = 4.0; // Batas maksimal 400%
+      }
+
+      document.getElementById('labelZoom').textContent = Math.round(tingkatZoom * 100) + '%';
+
+      // 3. Terapkan perubahan dimensi
+      if (tingkatZoom === 1.0) {
+        // Kunci kembali ke batas layar (Responsif)
+        elemenKanvas.style.maxWidth = '100%';
+        elemenKanvas.style.maxHeight = '85vh';
+        elemenKanvas.style.width = 'auto';
+        elemenKanvas.style.height = 'auto';
+      } else {
+        // Lepaskan batas layar, biarkan meluap agar bisa di-scroll
+        elemenKanvas.style.maxWidth = 'none';
+        elemenKanvas.style.maxHeight = 'none';
+
+        // Gunakan ukuran layar awal dikali rasio zoom
+        elemenKanvas.style.width = (lebarVisualDasar * tingkatZoom) + 'px';
+        elemenKanvas.style.height = 'auto'; // Tinggi otomatis proporsional
+      }
+    }
+  </script>
+</body>
+
+</html>
