@@ -716,6 +716,34 @@
       font-family: monospace;
       font-size: 13px;
     }
+
+    /* --- TOAST NOTIFICATION --- */
+    .toast-notif {
+      position: fixed;
+      top: 20px;
+      /* Muncul dari atas */
+      left: 50%;
+      transform: translate(-50%, -100px);
+      /* Tersembunyi di atas layar */
+      background: var(--panel);
+      border: 1px solid var(--accent);
+      color: var(--accent2);
+      padding: 10px 25px;
+      border-radius: 30px;
+      font-family: 'Patrick Hand', cursive;
+      font-size: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+      z-index: 9999;
+      transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s;
+      opacity: 0;
+      pointer-events: none;
+      /* Agar tidak menghalangi klik di bawahnya */
+    }
+
+    .toast-notif.muncul {
+      transform: translate(-50%, 0);
+      opacity: 1;
+    }
   </style>
 </head>
 
@@ -934,17 +962,23 @@
             <li><strong>Kenapa teks saya makin ke bawah makin meleset/menabrak garis?</strong><br>Ini disebut
               <em>Accumulating Error</em>. Kertas yang difoto biasanya tidak 100% datar atau lengkung akibat lensa
               kamera. Gunakan slider <strong>Koreksi Jarak Baris (Spasi)</strong> untuk merenggangkan atau merapatkan
-              spasi baris secara desimal (0.1px) hingga pas.</li>
+              spasi baris secara desimal (0.1px) hingga pas.
+            </li>
             <li><strong>Posisi baris pertama sudah pas, tapi saya ingin menaikkannya sedikit tanpa mengulang
                 kalibrasi?</strong><br>Gunakan slider <strong>Geser Y (Header/Konten)</strong> di menu <em>Presisi
                 Manual</em>. Fitur ini memungkinkan Anda menaik-turunkan blok teks secara instan.</li>
-            <li><strong>Bagaimana cara membuat alinea baru (menjorok ke dalam / Tab / Paragraf)?</strong><br>Klik di awal kalimat
+            <li><strong>Bagaimana cara membuat alinea baru (menjorok ke dalam / Tab / Paragraf)?</strong><br>Klik di
+              awal kalimat
               pada kotak teks, lalu tekan tombol <code>Tab</code> di keyboard Anda. Sistem akan otomatis menyuntikkan
               spasi kosong tanpa merusak urutan teks.</li>
           </ul>
         </div>
       </div>
     </div>
+  </div>
+
+  <div id="toastWelcome" class="toast-notif">
+    👋 Halo! Selamat datang. Jangan lupa lakukan kalibrasi kertasmu ya!
   </div>
 
   <script>
@@ -1699,10 +1733,31 @@
       tautan.click();
     }
 
-    // Jalankan saat pertama kali dimuat
+    function tampilkanWelcome() {
+      // Hanya muncul jika browser belum memiliki kunci 'sudahDisapa'
+      if (!localStorage.getItem('sudahDisapa')) {
+        const toast = document.getElementById('toastWelcome');
+
+        // Beri jeda 1 detik setelah web terbuka agar terasa natural
+        setTimeout(() => {
+          toast.classList.add('muncul');
+
+          // Hilangkan otomatis setelah tampil selama 4 detik
+          setTimeout(() => {
+            toast.classList.remove('muncul');
+          }, 4000);
+
+        }, 1000);
+
+        // Catat di memori browser agar tidak muncul lagi besok
+        localStorage.setItem('sudahDisapa', 'ya');
+      }
+    }
+
     window.onload = () => {
       inisialisasiUI();
       document.fonts.ready.then(() => bangunUlangKanvas());
+      tampilkanWelcome(); // Panggil fungsinya di sini
     };
 
     // ── LOGIKA MODAL BANTUAN ──
