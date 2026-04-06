@@ -339,23 +339,35 @@
       box-shadow: 0 0 0 2px rgba(240, 201, 122, .4);
     }
 
+    /* --- CUSTOM COLOR PICKER (WHEEL) --- */
     .cpicker {
-      width: 26px;
-      height: 26px;
+      /* width: 26px; */
+      /* height: 26px; */
       padding: 0;
-      border: none;
-      border-radius: 50%;
+      border: 0px solid transparent;
+      /* Mengikuti gaya .cdot */
+      border-radius: 100%;
       cursor: pointer;
+      /* Ini adalah warna pelanginya */
       background: conic-gradient(red, yellow, lime, cyan, blue, magenta, red);
+      overflow: hidden;
     }
 
     .cpicker::-webkit-color-swatch-wrapper {
       padding: 0;
     }
 
+    /* Trik utamanya ada di sini: Menyembunyikan blok warna bawaan browser */
     .cpicker::-webkit-color-swatch {
-      border: 2px solid #fff;
-      border-radius: 50%;
+      border: none;
+      opacity: 0;
+      /* Membuat lapisan hitam menjadi tembus pandang */
+    }
+
+    /* Dukungan untuk browser Firefox */
+    .cpicker::-moz-color-swatch {
+      border: none;
+      opacity: 0;
     }
 
     .sl-row {
@@ -552,6 +564,158 @@
     #myCanvas {
       transition: width 0.2s ease-out;
     }
+
+    #myCanvas.mode-ukur {
+      cursor: crosshair;
+      /* Pointer default saat kalibrasi */
+    }
+
+    #myCanvas.mode-ukur.can-drag {
+      cursor: ns-resize;
+      /* Pointer panah atas-bawah saat di atas garis horizontal */
+    }
+
+    #myCanvas.mode-ukur.can-drag-v {
+      cursor: ew-resize;
+      /* Pointer panah kiri-kanan saat di atas garis vertikal */
+    }
+
+    /* --- TOMBOL BANTUAN MENGAPUNG --- */
+    .btn-bantuan {
+      position: fixed;
+      right: 30px;
+      bottom: 30px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #000;
+      font-size: 24px;
+      font-weight: bold;
+      border: none;
+      font-family: inherit;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      z-index: 99;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-bantuan:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(212, 164, 76, 0.6);
+    }
+
+    /* --- MODAL DIALOG --- */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      display: none;
+      /* Disembunyikan secara default */
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(3px);
+    }
+
+    .modal-konten {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+      font-family: sans-serif;
+      /* Menggunakan font standar agar mudah dibaca */
+    }
+
+    .modal-header {
+      padding: 15px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h2 {
+      color: var(--accent2);
+      font-size: 18px;
+      margin: 0;
+      font-family: 'Patrick Hand', cursive;
+      letter-spacing: 1px;
+    }
+
+    .btn-tutup {
+      background: transparent;
+      color: var(--text);
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn-tutup:hover {
+      color: #ff4c4c;
+      transform: scale(1.2);
+    }
+
+    .modal-body {
+      padding: 20px;
+      overflow-y: auto;
+      color: #ddd;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .modal-body::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .modal-body::-webkit-scrollbar-thumb {
+      background: var(--panel2);
+      border-radius: 3px;
+    }
+
+    .modal-body h3 {
+      color: var(--accent);
+      margin-top: 20px;
+      margin-bottom: 8px;
+      font-size: 15px;
+      border-bottom: 1px dashed var(--border);
+      padding-bottom: 5px;
+    }
+
+    .modal-body h3:first-child {
+      margin-top: 0;
+    }
+
+    .modal-body ol,
+    .modal-body ul {
+      padding-left: 20px;
+      margin-bottom: 15px;
+    }
+
+    .modal-body li {
+      margin-bottom: 8px;
+    }
+
+    .modal-body code {
+      background: rgba(212, 164, 76, 0.2);
+      color: var(--accent2);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 13px;
+    }
   </style>
 </head>
 
@@ -577,7 +741,7 @@
           <textarea id="inputHeaderKanan" style="min-height:40px;">26 Maret 2026</textarea>
         </div>
         <div class="field"><label>Isi Tulisan</label>
-          <textarea id="inputKonten" style="min-height: 120px;">~~Lorem ipsum dolor sit amet consectetur adipisicing elit.
+          <textarea id="inputKonten" style="min-height: 150px;">~~Lorem ipsum dolor sit amet consectetur adipisicing elit.
     Ex quod corrupti, aperiam deserunt dicta autem ipsam cum commodi nihil itaque!~~</textarea>
         </div>
       </div>
@@ -612,14 +776,34 @@
         <button class="dl-btn btn-kalibrasi" id="btnMulaiKalibrasi" onclick="mulaiModeKalibrasi()" disabled>📐 3. Mulai
           Kalibrasi Area</button>
 
-        <div id="panelNavKalibrasi">
-          <div id="teksPetunjuk">Klik batas Kiri...</div>
-          <div class="nav-grup">
-            <button class="btn-nav" id="btnPrev" onclick="navigasiKalibrasi(-1)">◄ Sblm</button>
-            <button class="btn-nav aktif" id="btnNext" onclick="navigasiKalibrasi(1)">Lanjut ►</button>
+        <div id="panelNavKalibrasi" style="display: none; margin-top: 10px;">
+          <div
+            style="background: rgba(0,0,0,0.3); border: 1px solid var(--border); padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 12px; color: var(--text);">
+            <div
+              style="margin-bottom: 8px; color: var(--accent); font-weight: bold; text-transform: uppercase; font-size: 10px; letter-spacing: 1px;">
+              Panduan Warna Garis:</div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span
+                  style="width: 12px; height: 12px; background: #ff4c4c; border-radius: 3px; border: 1px solid #000;"></span>
+                Header Kiri
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span
+                  style="width: 12px; height: 12px; background: #4cde4c; border-radius: 3px; border: 1px solid #000;"></span>
+                Header Kanan
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span
+                  style="width: 12px; height: 12px; background: #50b4ff; border-radius: 3px; border: 1px solid #000;"></span>
+                Konten Utama
+              </div>
+            </div>
           </div>
-          <button class="btn-nav btn-selesai" id="btnSelesaiKalibrasi" onclick="selesaiKalibrasi()"
-            style="width: 100%; margin-top: 5px; display: none;">Selesai & Simpan ✅</button>
+
+          <button class="btn-nav btn-selesai" onclick="selesaiKalibrasi()"
+            style="width: 100%; padding: 10px; font-size: 13px; display: block; border-radius: 6px;">Selesai & Simpan
+            Kalibrasi ✅</button>
         </div>
       </div>
 
@@ -717,6 +901,50 @@
     <div class="canvas-wrap">
       <canvas id="myCanvas"></canvas>
     </div>
+    <button class="btn-bantuan" onclick="bukaModal()">?</button>
+
+    <div class="modal-overlay" id="modalBantuan" onclick="tutupModalLuar(event)">
+      <div class="modal-konten">
+        <div class="modal-header">
+          <h2>📖 Panduan & FAQ Bot Nulis</h2>
+          <button class="btn-tutup" onclick="tutupModal()">✖</button>
+        </div>
+        <div class="modal-body">
+          <h3>🚀 Cara Menggunakan (Tutorial)</h3>
+          <ol>
+            <li><strong>Pilih Kertas:</strong> Pilih preset kertas di menu kiri, atau unggah foto kertas Anda sendiri
+              (disarankan ukuran gambar tidak terlalu raksasa).</li>
+            <li><strong>Kalibrasi Garis (PENTING):</strong> Klik tombol hijau "Mulai Kalibrasi Area". Sistem akan
+              memunculkan garis-garis pembatas. <strong>Arahkan kursor ke kapsul penggeser pada garis, lalu klik, tahan,
+                dan geser (drag)</strong> ke posisi batas dan garis buku Anda.<br>
+              <em>*Merah = Header Kiri, Hijau = Header Kanan, Biru = Konten Utama.</em>
+            </li>
+            <li><strong>Tulis Konten:</strong> Ketik tugas Anda di panel kiri. Teks akan secara otomatis menyelaraskan
+              diri dengan garis kertas yang baru saja Anda atur.</li>
+            <li><strong>Unduh:</strong> Jika tata letaknya sudah rapi, klik tombol "Simpan Hasil (.png)" di bagian
+              paling bawah panel kiri.</li>
+          </ol>
+
+          <h3>💡 FAQ (Pertanyaan Umum)</h3>
+          <ul>
+            <li><strong>Bagaimana cara membuat coretan salah tulis (typo)?</strong><br>Apit kata atau kalimat utuh
+              dengan tanda tilde ganda, contoh: <code>~~ini salah ketik~~</code>. Garis coretan akan otomatis menyambung
+              melintasi spasi. Anda juga bisa mengatur tingkat "amarah/kebrutalan" coretan melalui slider <strong>Jumlah
+                Coretan Typo</strong> di menu <em>Presisi Manual</em>.</li>
+            <li><strong>Kenapa teks saya makin ke bawah makin meleset/menabrak garis?</strong><br>Ini disebut
+              <em>Accumulating Error</em>. Kertas yang difoto biasanya tidak 100% datar atau lengkung akibat lensa
+              kamera. Gunakan slider <strong>Koreksi Jarak Baris (Spasi)</strong> untuk merenggangkan atau merapatkan
+              spasi baris secara desimal (0.1px) hingga pas.</li>
+            <li><strong>Posisi baris pertama sudah pas, tapi saya ingin menaikkannya sedikit tanpa mengulang
+                kalibrasi?</strong><br>Gunakan slider <strong>Geser Y (Header/Konten)</strong> di menu <em>Presisi
+                Manual</em>. Fitur ini memungkinkan Anda menaik-turunkan blok teks secara instan.</li>
+            <li><strong>Bagaimana cara membuat alinea baru (menjorok ke dalam / Tab / Paragraf)?</strong><br>Klik di awal kalimat
+              pada kotak teks, lalu tekan tombol <code>Tab</code> di keyboard Anda. Sistem akan otomatis menyuntikkan
+              spasi kosong tanpa merusak urutan teks.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -764,23 +992,15 @@
       }
     };
 
-    const PetaKalibrasi = [
-      { id: 0, zona: 'headerKiri', prop: 'marginKiri', tipe: 'X', nama: '<b>[Header Kiri]</b><br>1. Klik Batas KIRI' },
-      { id: 1, zona: 'headerKiri', prop: 'batasKanan', tipe: 'X', nama: '<b>[Header Kiri]</b><br>2. Klik Batas KANAN' },
-      { id: 2, zona: 'headerKiri', prop: 'awalY', tipe: 'Y', nama: '<b>[Header Kiri]</b><br>3. Klik GARIS 1 (Atas)' },
-      { id: 3, zona: 'headerKiri', prop: 'yKedua', tipe: 'Y', nama: '<b>[Header Kiri]</b><br>4. Klik GARIS 2 (Bawah)' },
+    // --- STATE INTERAKSI DRAG BARU ---
+    const Interaksi = {
+      lineDragging: null, // Menyimpan ID garis yang sedang di-drag
+      activeHandle: null, // Menyimpan ID handle yang di-hover mouse
+      hoverLine: null     // Menyimpan ID garis yang di-hover mouse
+    };
 
-      { id: 4, zona: 'headerKanan', prop: 'marginKiri', tipe: 'X', nama: '<b>[Header Kanan]</b><br>5. Klik Batas KIRI' },
-      { id: 5, zona: 'headerKanan', prop: 'batasKanan', tipe: 'X', nama: '<b>[Header Kanan]</b><br>6. Klik Batas KANAN' },
-      { id: 6, zona: 'headerKanan', prop: 'awalY', tipe: 'Y', nama: '<b>[Header Kanan]</b><br>7. Klik GARIS 1 (Atas)' },
-      { id: 7, zona: 'headerKanan', prop: 'yKedua', tipe: 'Y', nama: '<b>[Header Kanan]</b><br>8. Klik GARIS 2 (Bawah)' },
-
-      { id: 8, zona: 'konten', prop: 'marginKiri', tipe: 'X', nama: '<b>[Konten Utama]</b><br>9. Klik Batas KIRI' },
-      { id: 9, zona: 'konten', prop: 'batasKanan', tipe: 'X', nama: '<b>[Konten Utama]</b><br>10. Klik Batas KANAN' },
-      { id: 10, zona: 'konten', prop: 'awalY', tipe: 'Y', nama: '<b>[Konten Utama]</b><br>11. Klik GARIS 1 (Atas)' },
-      { id: 11, zona: 'konten', prop: 'yKedua', tipe: 'Y', nama: '<b>[Konten Utama]</b><br>12. Klik GARIS 2 (Bawah)' }
-    ];
-    let langkahAktif = 0;
+    // Ukuran handle (kotak kecil) visual di layar
+    const HANDLE_SIZE_SCREEN = 30;
 
     // --- INISIALISASI UI ---
     function inisialisasiUI() {
@@ -1135,85 +1355,323 @@
     function mulaiModeKalibrasi() {
       Status.modeAplikasi = 'kalibrasi';
       elemenKanvas.classList.add('mode-ukur');
+
+      // Tampilkan panel selesai, sembunyikan tombol mulai
       document.getElementById('panelNavKalibrasi').style.display = 'block';
+      document.getElementById('btnMulaiKalibrasi').style.display = 'none';
 
-      langkahAktif = 0;
-      perbaruiUINavigasi();
       jadwalkanGambarUlang();
-    }
-
-    function navigasiKalibrasi(arah) {
-      langkahAktif += arah;
-      if (langkahAktif < 0) langkahAktif = 0;
-      if (langkahAktif > 11) langkahAktif = 11;
-      perbaruiUINavigasi();
-      jadwalkanGambarUlang();
-    }
-
-    function perbaruiUINavigasi() {
-      const stepData = PetaKalibrasi[langkahAktif];
-      document.getElementById('teksPetunjuk').innerHTML = stepData.nama;
-      document.getElementById('btnPrev').disabled = (langkahAktif === 0);
-
-      if (langkahAktif === 11 && Status.kalibrasi.konten.yKedua !== undefined && Status.kalibrasi.konten.yKedua !== null) {
-        document.getElementById('btnNext').style.display = 'none';
-        document.getElementById('btnSelesaiKalibrasi').style.display = 'block';
-      } else {
-        document.getElementById('btnNext').style.display = 'block';
-        document.getElementById('btnSelesaiKalibrasi').style.display = 'none';
-      }
     }
 
     function selesaiKalibrasi() {
       Status.modeAplikasi = 'tulis';
       elemenKanvas.classList.remove('mode-ukur');
+
+      // Sembunyikan panel selesai, munculkan kembali tombol mulai
       document.getElementById('panelNavKalibrasi').style.display = 'none';
-      alert("Penyimpanan Kalibrasi Berhasil!");
+      document.getElementById('btnMulaiKalibrasi').style.display = 'flex';
+
       jadwalkanGambarUlang();
     }
 
+    // ── MESIN INTERAKSI MOUSE (TOTAL OVERHAUL) ──
+
+    // 1. MOUSE DOWN (Mulai Dragging)
     elemenKanvas.addEventListener('mousedown', function (kejadian) {
       if (Status.modeAplikasi !== 'kalibrasi') return;
 
-      const batasKanvas = elemenKanvas.getBoundingClientRect();
-      const rasioX = elemenKanvas.width / batasKanvas.width;
-      const rasioY = elemenKanvas.height / batasKanvas.height;
-      const klikX = (kejadian.clientX - batasKanvas.left) * rasioX;
-      const klikY = (kejadian.clientY - batasKanvas.top) * rasioY;
+      const pos = dapatkanPosisiCanvas(kejadian);
+      const dataHit = hitTest(pos.x, pos.y);
 
-      const stepData = PetaKalibrasi[langkahAktif];
-      const zona = Status.kalibrasi[stepData.zona];
+      if (dataHit) {
+        // Jika mouse menekan handle atau garis
+        Interaksi.lineDragging = dataHit.propId;
+        Interaksi.initialMousePos = (dataHit.tipe === 'X') ? pos.x : pos.y;
+        Interaksi.initialLinePos = dapatkanNilaiKalibrasi(dataHit.propId);
+      }
+    });
 
-      if (stepData.tipe === 'X') { zona[stepData.prop] = klikX; }
-      else { zona[stepData.prop] = klikY; }
+    // 2. MOUSE MOVE (Proses Dragging & Hover Feedback)
+    elemenKanvas.addEventListener('mousemove', function (kejadian) {
+      if (Status.modeAplikasi !== 'kalibrasi') {
+        elemenKanvas.classList.remove('can-drag', 'can-drag-v');
+        Interaksi.hoverLine = null;
+        Interaksi.activeHandle = null;
+        return;
+      }
 
-      if (langkahAktif < 11) {
-        navigasiKalibrasi(1);
+      const pos = dapatkanPosisiCanvas(kejadian);
+
+      if (Interaksi.lineDragging) {
+        // --- LOGIKA DRAGGING AKTIF ---
+        const propId = Interaksi.lineDragging;
+        const tipe = Interaksi.initialLinePos.tipe;
+
+        let nilaiBaru;
+        if (tipe === 'X') {
+          nilaiBaru = pos.x;
+        } else {
+          nilaiBaru = pos.y;
+        }
+
+        // Terapkan nilai baru ke Status.kalibrasi
+        pembaruanNilaiKalibrasi(propId, nilaiBaru);
+        jadwalkanGambarUlang();
+
       } else {
-        perbaruiUINavigasi();
+        // --- LOGIKA HOVER (UMPAN BALIK VISUAL) ---
+        const dataHit = hitTest(pos.x, pos.y);
+        Interaksi.hoverLine = dataHit ? dataHit.propId : null;
+        Interaksi.activeHandle = (dataHit && dataHit.nearHandle) ? dataHit.propId : null;
+
+        // Ubah cursor berdasarkan tipe garis yang di-hover
+        if (dataHit) {
+          if (dataHit.tipe === 'X') {
+            elemenKanvas.classList.remove('can-drag');
+            elemenKanvas.classList.add('can-drag-v');
+          } else {
+            elemenKanvas.classList.remove('can-drag-v');
+            elemenKanvas.classList.add('can-drag');
+          }
+        } else {
+          elemenKanvas.classList.remove('can-drag', 'can-drag-v');
+        }
+
+        // Kita perlu gambar ulang untuk meng-update warna highlight pada hover
         jadwalkanGambarUlang();
       }
     });
 
+    // 3. MOUSE UP (Selesai Dragging)
+    window.addEventListener('mouseup', function () {
+      if (Status.modeAplikasi !== 'kalibrasi') return;
+      Interaksi.lineDragging = null; // Lepas kuncian drag
+    });
+
+
+    // ── FUNGSI PEMBANTU INTERAKSI ──
+
+    // Mengonversi koordinat layar mouse menjadi koordinat internal Canvas (Piksel Asli)
+    function dapatkanPosisiCanvas(e) {
+      const batasKanvas = elemenKanvas.getBoundingClientRect();
+      const rasioX = elemenKanvas.width / batasKanvas.width;
+      const rasioY = elemenKanvas.height / batasKanvas.height;
+      return {
+        x: (e.clientX - batasKanvas.left) * rasioX,
+        y: (e.clientY - batasKanvas.top) * rasioY,
+        rasioX: rasioX,
+        rasioY: rasioY
+      };
+    }
+
+    // Mendeteksi apakah mouse berada di atas garis atau handle (Hit-Testing)
+    function hitTest(canvasX, canvasY) {
+      // Ambil rasio CSS aktual untuk akurasi hit-test handle
+      const batasKanvas = elemenKanvas.getBoundingClientRect();
+      const rasioY = elemenKanvas.height / batasKanvas.height;
+
+      // Batas toleransi klik garis (sekitar 15 piksel CSS)
+      const toleransiScreenY = 15;
+      const toleransiCanvasY = toleransiScreenY * rasioY;
+
+      // Ukuran handle aktual dalam koordinat Canvas
+      const handleSizeCanvas = HANDLE_SIZE_SCREEN * rasioY;
+
+      // Iterasi ke-3 zona kalibrasi (headerKiri, headerKanan, konten)
+      for (const zonaKey in Status.kalibrasi) {
+        const zona = Status.kalibrasi[zonaKey];
+
+        // Cek Properti Vertikal (Tipe X: marginKiri, batasKanan)
+        const vProps = ['marginKiri', 'batasKanan'];
+        for (const prop of vProps) {
+          const xVal = zona[prop];
+          const yMid = elemenKanvas.height / 2; // Handle ada di tengah tinggi kanvas
+
+          if (canvasX > xVal - toleransiCanvasY && canvasX < xVal + toleransiCanvasY) {
+            // Mouse di atas garis vertikal, cek apakah dekat handle di tengah
+            const nearHandle = (canvasY > yMid - handleSizeCanvas && canvasY < yMid + handleSizeCanvas);
+            return { propId: `${zonaKey}_${prop}`, tipe: 'X', nearHandle: nearHandle };
+          }
+        }
+
+        // Cek Properti Horizontal (Tipe Y: awalY, yKedua)
+        const hProps = ['awalY', 'yKedua'];
+        for (const prop of hProps) {
+          const yVal = zona[prop];
+          const xMid = elemenKanvas.width / 2; // Handle ada di tengah lebar kanvas
+
+          if (canvasY > yVal - toleransiCanvasY && canvasY < yVal + toleransiCanvasY) {
+            // Mouse di atas garis horizontal, cek apakah dekat handle di tengah
+            const nearHandle = (canvasX > xMid - handleSizeCanvas && canvasX < xMid + handleSizeCanvas);
+            return { propId: `${zonaKey}_${prop}`, tipe: 'Y', nearHandle: nearHandle };
+          }
+        }
+      }
+      return null;
+    }
+
+    // Mengambil nilai aktual (piksel) dari Status.kalibrasi berdasarkan ID string
+    function dapatkanNilaiKalibrasi(propId) {
+      const [zonaKey, propKey] = propId.split('_');
+      const tipe = (propKey === 'marginKiri' || propKey === 'batasKanan') ? 'X' : 'Y';
+      return { nilai: Status.kalibrasi[zonaKey][propKey], tipe: tipe };
+    }
+
+    // Meng-update nilai Status.kalibrasi berdasarkan ID string
+    function pembaruanNilaiKalibrasi(propId, nilaiBaru) {
+      const [zonaKey, propKey] = propId.split('_');
+      Status.kalibrasi[zonaKey][propKey] = nilaiBaru;
+    }
+
+    // ── FUNGSI RENDERING GARIS INTERAKTIF (MODERN UI) ──
     function renderGarisKalibrasi() {
-      konteks.lineWidth = 3;
-      PetaKalibrasi.forEach((step, index) => {
-        if (index > langkahAktif) return;
+      const batasKanvas = elemenKanvas.getBoundingClientRect();
+      const rasioX = elemenKanvas.width / batasKanvas.width;
+      const rasioY = elemenKanvas.height / batasKanvas.height;
 
-        const nilai = Status.kalibrasi[step.zona][step.prop];
-        if (nilai === null || nilai === undefined) return;
+      const warnaZona = {
+        headerKiri: '#ff4c4c', // Merah
+        headerKanan: '#4cde4c', // Hijau
+        konten: '#50b4ff'      // Biru
+      };
 
+      // FUNGSI PEMBANTU: Melukis elemen UI modern di dalam Canvas
+      function gambarHandleModern(x, y, tipe, label, warna, isActive) {
+        konteks.save();
+
+        // 1. Gambar Garis Transparan & Glow
         konteks.beginPath();
-        const warnaGaris = (index === langkahAktif) ? '#ffea00' : (step.tipe === 'X' ? 'rgba(255, 0, 0, 0.5)' : 'rgba(0, 150, 255, 0.5)');
-        konteks.strokeStyle = warnaGaris;
+        konteks.strokeStyle = isActive ? '#fff' : warna;
+        konteks.lineWidth = isActive ? 2 * rasioX : 1.5 * rasioX;
+        konteks.globalAlpha = isActive ? 1.0 : 0.6; // Garis agak transparan jika tidak disentuh
 
-        if (step.tipe === 'X') {
-          konteks.moveTo(nilai, 0); konteks.lineTo(nilai, elemenKanvas.height);
+        if (tipe === 'X') {
+          konteks.moveTo(x, 0); konteks.lineTo(x, elemenKanvas.height);
         } else {
-          konteks.moveTo(0, nilai); konteks.lineTo(elemenKanvas.width, nilai);
+          konteks.moveTo(0, y); konteks.lineTo(elemenKanvas.width, y);
+        }
+
+        if (isActive) {
+          konteks.shadowColor = warna;
+          konteks.shadowBlur = 10 * rasioX;
         }
         konteks.stroke();
-      });
+
+        // Reset Alpha & Shadow
+        konteks.globalAlpha = 1.0;
+        konteks.shadowBlur = 0;
+
+        // Dimensi Kapsul (Pill)
+        const w = (tipe === 'X') ? 16 * rasioX : 36 * rasioX;
+        const h = (tipe === 'X') ? 36 * rasioY : 16 * rasioY;
+        const radius = 8 * Math.min(rasioX, rasioY);
+
+        // 2. Gambar Bayangan (Drop Shadow) Kapsul
+        konteks.shadowColor = 'rgba(0, 0, 0, 0.4)';
+        konteks.shadowBlur = 8 * Math.min(rasioX, rasioY);
+        konteks.shadowOffsetY = 3 * rasioY;
+
+        // 3. Gambar Bentuk Kapsul Utama
+        konteks.fillStyle = isActive ? '#ffffff' : '#f0f4ff';
+        konteks.beginPath();
+        // Fallback roundRect jika browser agak lawas
+        if (konteks.roundRect) {
+          konteks.roundRect(x - w / 2, y - h / 2, w, h, radius);
+        } else {
+          konteks.rect(x - w / 2, y - h / 2, w, h); // Fallback kotak biasa
+        }
+        konteks.fill();
+
+        // Matikan bayangan untuk elemen di atasnya
+        konteks.shadowColor = 'transparent';
+
+        // 4. Gambar Titik-titik Grip (Di dalam kapsul)
+        konteks.fillStyle = isActive ? '#000' : warna;
+        const dotR = 1.5 * Math.min(rasioX, rasioY);
+
+        if (tipe === 'X') {
+          // Grip Vertikal (2 kolom, 3 baris)
+          const dx = 3 * rasioX; const dy = 6 * rasioY;
+          [-1, 1].forEach(cx => {
+            [-1, 0, 1].forEach(cy => {
+              konteks.beginPath(); konteks.arc(x + cx * dx, y + cy * dy, dotR, 0, Math.PI * 2); konteks.fill();
+            });
+          });
+        } else {
+          // Grip Horizontal (3 kolom, 2 baris)
+          const dx = 6 * rasioX; const dy = 3 * rasioY;
+          [-1, 0, 1].forEach(cx => {
+            [-1, 1].forEach(cy => {
+              konteks.beginPath(); konteks.arc(x + cx * dx, y + cy * dy, dotR, 0, Math.PI * 2); konteks.fill();
+            });
+          });
+        }
+
+        // 5. Gambar Tooltip Label yang Elegan
+        konteks.font = `bold ${10 * rasioY}px sans-serif`;
+        const textW = konteks.measureText(label).width;
+        const padX = 6 * rasioX; const padY = 4 * rasioY;
+
+        let tagX, tagY;
+        if (tipe === 'X') {
+          tagX = x + w / 2 + (8 * rasioX);
+          tagY = y - (8 * rasioY);
+        } else {
+          tagX = x + (12 * rasioX);
+          tagY = y - h / 2 - (20 * rasioY);
+        }
+
+        // Background Tooltip
+        konteks.fillStyle = warna;
+        konteks.beginPath();
+        if (konteks.roundRect) {
+          konteks.roundRect(tagX, tagY, textW + (padX * 2), (10 * rasioY) + (padY * 2), 3 * rasioY);
+        } else {
+          konteks.fillRect(tagX, tagY, textW + (padX * 2), (10 * rasioY) + (padY * 2));
+        }
+        konteks.fill();
+
+        // Teks Tooltip
+        konteks.fillStyle = '#111'; // Kontras tinggi
+        konteks.textAlign = 'left';
+        konteks.textBaseline = 'top';
+        konteks.fillText(label, tagX + padX, tagY + padY);
+
+        konteks.restore();
+      }
+
+      // -- EKSEKUSI PEMANGGILAN UNTUK SEMUA GARIS --
+      for (const zonaKey in Status.kalibrasi) {
+        const zona = Status.kalibrasi[zonaKey];
+        const warnaBase = warnaZona[zonaKey];
+
+        // Garis Vertikal (Kiri/Kanan)
+        ['marginKiri', 'batasKanan'].forEach(prop => {
+          const xVal = zona[prop];
+          if (xVal == null) return;
+          const propId = `${zonaKey}_${prop}`;
+          const isActive = (Interaksi.hoverLine === propId || Interaksi.lineDragging === propId);
+          const label = prop === 'marginKiri' ? 'Batas Kiri' : 'Batas Kanan';
+
+          gambarHandleModern(xVal, elemenKanvas.height / 2, 'X', label, warnaBase, isActive);
+        });
+
+        // Garis Horizontal (Atas/Bawah)
+        ['awalY', 'yKedua'].forEach(prop => {
+          const yVal = zona[prop];
+          if (yVal == null) return;
+          const propId = `${zonaKey}_${prop}`;
+          const isActive = (Interaksi.hoverLine === propId || Interaksi.lineDragging === propId);
+          const label = prop === 'awalY' ? 'Garis 1 (Atas)' : 'Garis 2 (Bawah)';
+
+          // Agar handle tidak bertumpuk, geser posisi handle X sedikit berdasarkan zona
+          let xOffset = elemenKanvas.width / 2;
+          if (zonaKey === 'headerKiri') xOffset = elemenKanvas.width * 0.2;
+          if (zonaKey === 'headerKanan') xOffset = elemenKanvas.width * 0.8;
+
+          gambarHandleModern(xOffset, yVal, 'Y', label, warnaBase, isActive);
+        });
+      }
     }
 
     // --- BINDING EVENT INPUT & TAB ---
@@ -1246,6 +1704,23 @@
       inisialisasiUI();
       document.fonts.ready.then(() => bangunUlangKanvas());
     };
+
+    // ── LOGIKA MODAL BANTUAN ──
+    function bukaModal() {
+      document.getElementById('modalBantuan').style.display = 'flex';
+    }
+
+    function tutupModal() {
+      document.getElementById('modalBantuan').style.display = 'none';
+    }
+
+    // Menutup modal jika pengguna mengklik area gelap di luar kotak modal
+    function tutupModalLuar(event) {
+      const overlay = document.getElementById('modalBantuan');
+      if (event.target === overlay) {
+        tutupModal();
+      }
+    }
 
     // ── LOGIKA ZOOM PREVIEW ──
     let tingkatZoom = 1.0;
