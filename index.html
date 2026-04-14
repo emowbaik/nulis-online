@@ -1242,12 +1242,16 @@
         const kecocokanSpasiAwal = paragraf.match(/^\s*/);
         const spasiAwal = kecocokanSpasiAwal ? kecocokanSpasiAwal[0] : "";
 
+        // KUNCI: Buat salinan spasi yang bisa dimanipulasi/dikosongkan
+        let spasiAktif = spasiAwal;
+
         const kataKataRaw = paragraf.trimStart().split(' ');
 
-        let barisSaatIni = []; // Menyimpan objek kata di baris aktif
-        let lebarBarisSaatIni = konteks.measureText(spasiAwal).width; // Mulai hitung lebar dengan spasi awal
+        let barisSaatIni = [];
+        // Hitung lebar awal menggunakan spasiAktif
+        let lebarBarisSaatIni = konteks.measureText(spasiAktif).width;
 
-        let modeCoretAktif = false; // INI ADALAH TOMBOL ON/OFF CORETAN
+        let modeCoretAktif = false;
 
         kataKataRaw.forEach((kataRaw, index) => {
           let teksKataMurni = kataRaw;
@@ -1274,10 +1278,11 @@
 
           // --- LOGIKA WORD-WRAP (TURUN BARIS) ---
           if (lebarBarisSaatIni + lebarKataIni > batasLebar && barisSaatIni.length > 0) {
-            gambarSatuBarisTeks(konteks, barisSaatIni, koordinatXDasar, posisiY, spasiAwal, Skala, ukuranFontInput, jumlahCoretanInput);
+            gambarSatuBarisTeks(konteks, barisSaatIni, koordinatXDasar, posisiY, spasiAktif, Skala, ukuranFontInput, jumlahCoretanInput);
             posisiY += jarakBaris;
             barisSaatIni = [];
             lebarBarisSaatIni = 0;
+            spasiAktif = "";
           }
 
           // Tambahkan kata ke baris aktif dengan status coret yang baru
@@ -1287,7 +1292,8 @@
 
         // 4. Gambar sisa kata di paragraf (baris terakhir paragraf)
         if (barisSaatIni.length > 0) {
-          gambarSatuBarisTeks(konteks, barisSaatIni, koordinatXDasar, posisiY, spasiAwal, Skala, ukuranFontInput, jumlahCoretanInput);
+          // Pastikan menggunakan spasiAktif di sini juga
+          gambarSatuBarisTeks(konteks, barisSaatIni, koordinatXDasar, posisiY, spasiAktif, Skala, ukuranFontInput, jumlahCoretanInput);
           posisiY += jarakBaris;
         }
       });
