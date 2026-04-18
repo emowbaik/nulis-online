@@ -1755,6 +1755,8 @@
       });
     });
 
+    let batchUnduh = 1;
+
     function unduhGambar() {
       if (Status.modeAplikasi !== 'tulis') {
         alert("Selesaikan kalibrasi terlebih dahulu!"); return;
@@ -1763,9 +1765,15 @@
         alert("Pilih atau unggah kertas terlebih dahulu."); return;
       }
       const tautan = document.createElement('a');
-      tautan.download = `BotNulis_${new Date().getTime()}.png`;
+      const now = new Date();
+      const tgl = String(now.getDate()).padStart(2, '0');
+      const bln = String(now.getMonth() + 1).padStart(2, '0');
+      const thn = now.getFullYear();
+      const numBatch = String(batchUnduh).padStart(2, '0');
+      tautan.download = `NulisOnline_${tgl}${bln}${thn}_${numBatch}.png`;
       tautan.href = elemenKanvas.toDataURL('image/png');
       tautan.click();
+      batchUnduh++;
     }
 
     function tampilkanWelcome() {
