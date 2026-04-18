@@ -1,5 +1,5 @@
 // ==========================================
-    // LOGIKA MESIN V8 (JavaScript Engine)
+    // LOGIKA MESIN (JavaScript Engine)
     // ==========================================
 
     const elemenKanvas = document.getElementById('myCanvas');
