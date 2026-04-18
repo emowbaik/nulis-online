@@ -215,44 +215,11 @@
     <div class="modal-overlay" id="modalBantuan" onclick="tutupModalLuar(event)">
       <div class="modal-konten">
         <div class="modal-header">
-          <h2>📖 Panduan & FAQ Bot Nulis</h2>
+          <h2>📖 Panduan & FAQ Nulis Online</h2>
           <button class="btn-tutup" onclick="tutupModal()">✖</button>
         </div>
         <div class="modal-body">
-          <h3>🚀 Cara Menggunakan (Tutorial)</h3>
-          <ol>
-            <li><strong>Pilih Kertas:</strong> Pilih preset kertas di menu kiri, atau unggah foto kertas Anda sendiri
-              (disarankan ukuran gambar tidak terlalu raksasa).</li>
-            <li><strong>Kalibrasi Garis (PENTING):</strong> Klik tombol hijau "Mulai Kalibrasi Area". Sistem akan
-              memunculkan garis-garis pembatas. <strong>Arahkan kursor ke kapsul penggeser pada garis, lalu klik, tahan,
-                dan geser (drag)</strong> ke posisi batas dan garis buku Anda.<br>
-              <em>*Merah = Header Kiri, Hijau = Header Kanan, Biru = Konten Utama.</em>
-            </li>
-            <li><strong>Tulis Konten:</strong> Ketik tugas Anda di panel kiri. Teks akan secara otomatis menyelaraskan
-              diri dengan garis kertas yang baru saja Anda atur.</li>
-            <li><strong>Unduh:</strong> Jika tata letaknya sudah rapi, klik tombol "Simpan Hasil (.png)" di bagian
-              paling bawah panel kiri.</li>
-          </ol>
-
-          <h3>💡 FAQ (Pertanyaan Umum)</h3>
-          <ul>
-            <li><strong>Bagaimana cara membuat coretan salah tulis (typo)?</strong><br>Apit kata atau kalimat utuh
-              dengan tanda tilde ganda, contoh: <code>~~ini salah ketik~~</code>. Garis coretan akan otomatis menyambung
-              melintasi spasi. Anda juga bisa mengatur tingkat "amarah/kebrutalan" coretan melalui slider <strong>Jumlah
-                Coretan Typo</strong> di menu <em>Presisi Manual</em>.</li>
-            <li><strong>Kenapa teks saya makin ke bawah makin meleset/menabrak garis?</strong><br>Ini disebut
-              <em>Accumulating Error</em>. Kertas yang difoto biasanya tidak 100% datar atau lengkung akibat lensa
-              kamera. Gunakan slider <strong>Koreksi Jarak Baris (Spasi)</strong> untuk merenggangkan atau merapatkan
-              spasi baris secara desimal (0.1px) hingga pas.
-            </li>
-            <li><strong>Posisi baris pertama sudah pas, tapi saya ingin menaikkannya sedikit tanpa mengulang
-                kalibrasi?</strong><br>Gunakan slider <strong>Geser Y (Header/Konten)</strong> di menu <em>Presisi
-                Manual</em>. Fitur ini memungkinkan Anda menaik-turunkan blok teks secara instan.</li>
-            <li><strong>Bagaimana cara membuat alinea baru (menjorok ke dalam / Tab / Paragraf)?</strong><br>Klik di
-              awal kalimat
-              pada kotak teks, lalu tekan tombol <code>Tab</code> di keyboard Anda. Sistem akan otomatis menyuntikkan
-              spasi kosong tanpa merusak urutan teks.</li>
-          </ul>
+          <!-- Konten FAQ dirender secara dinamis oleh js/faq.js -->
         </div>
       </div>
     </div>
@@ -262,6 +229,7 @@
     👋 Halo! Selamat datang. Jangan lupa lakukan kalibrasi kertasmu ya!
   </div>
 
+  <script src="js/faq.js"></script>
   <script src="js/app.js"></script>
 </body>
 

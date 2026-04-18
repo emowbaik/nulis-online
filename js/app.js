@@ -799,6 +799,7 @@
       inisialisasiUI();
       document.fonts.ready.then(() => bangunUlangKanvas());
       tampilkanWelcome(); // Panggil fungsinya di sini
+      bukaModal(); // Otomatis buka pop-up panduan & FAQ
     };
 
     // ── LOGIKA MODAL BANTUAN ──
