@@ -281,20 +281,58 @@ function renderZona(namaZona, teksInput, Skala) {
         modeCoretAktif = false; // Kata berikutnya tidak akan dicoret
       }
 
-      // Hitung lebar kata ini (tambah spasi jika bukan kata pertama)
-      const teksDenganSpasi = (index === 0 && spasiAwal === "") ? teksKataMurni : ' ' + teksKataMurni;
-      const lebarKataIni = konteks.measureText(teksDenganSpasi).width;
+      // Hitung lebar kata ini (tambah spasi jika baris sudah ada isinya)
+      let perluSpasi = (barisSaatIni.length > 0);
+      let teksDenganSpasi = (perluSpasi ? ' ' : '') + teksKataMurni;
+      let lebarKataIni = konteks.measureText(teksDenganSpasi).width;
 
-      // --- LOGIKA WORD-WRAP (TURUN BARIS) ---
-      if (lebarBarisSaatIni + lebarKataIni > batasLebar && barisSaatIni.length > 0) {
-        gambarSatuBarisTeks(konteks, barisSaatIni, koordinatXDasar, posisiY, spasiAktif, Skala, ukuranFontInput, jumlahCoretanInput);
-        posisiY += jarakBaris;
-        barisSaatIni = [];
-        lebarBarisSaatIni = 0;
-        spasiAktif = "";
+      // --- LOGIKA WORD-WRAP & PEMOTONGAN KATA PANJANG ---
+      if (lebarBarisSaatIni + lebarKataIni > batasLebar) {
+        // Jika baris saat ini tidak kosong, render dulu isinya dan pindah ke baris baru
+        if (barisSaatIni.length > 0) {
+          gambarSatuBarisTeks(konteks, barisSaatIni, koordinatXDasar, posisiY, spasiAktif, Skala, ukuranFontInput, jumlahCoretanInput);
+          posisiY += jarakBaris;
+          barisSaatIni = [];
+          lebarBarisSaatIni = 0;
+          spasiAktif = "";
+
+          // Evaluasi ulang ukuran kata untuk baris yang baru kosong (tanpa spasi di awal)
+          teksDenganSpasi = teksKataMurni;
+          lebarKataIni = konteks.measureText(teksKataMurni).width;
+        }
+
+        // Jika panjang KATA MURNI itu sendiri melebihi batas kanvas (kata tanpa spasi), paksa pecah per karakter!
+        if (lebarKataIni > batasLebar) {
+          let stringSementara = "";
+          for (let i = 0; i < teksKataMurni.length; i++) {
+            const char = teksKataMurni[i];
+            const tesString = stringSementara + char;
+            const lebarTes = konteks.measureText(tesString).width;
+
+            if (lebarBarisSaatIni + lebarTes > batasLebar && stringSementara.length > 0) {
+              // Baris penuh, buang stringSementara ke kanvas dan turun baris
+              barisSaatIni.push({ teks: stringSementara, lebar: konteks.measureText(stringSementara).width, coret: harusDicoretKataIni });
+              gambarSatuBarisTeks(konteks, barisSaatIni, koordinatXDasar, posisiY, spasiAktif, Skala, ukuranFontInput, jumlahCoretanInput);
+              posisiY += jarakBaris;
+              barisSaatIni = [];
+              lebarBarisSaatIni = 0;
+              spasiAktif = "";
+              stringSementara = char; // Mulai baris baru dengan karakter yang belum muat
+            } else {
+              stringSementara = tesString;
+            }
+          }
+          // Masukkan sisa karakter yang belum di-render ke baris saat ini
+          if (stringSementara.length > 0) {
+            const lebarSisa = konteks.measureText(stringSementara).width;
+            barisSaatIni.push({ teks: stringSementara, lebar: lebarSisa, coret: harusDicoretKataIni });
+            lebarBarisSaatIni += lebarSisa;
+          }
+          return; // Selesai memproses kata yang super panjang, lanjut ke kata berikutnya
+        }
       }
 
-      // Tambahkan kata ke baris aktif dengan status coret yang baru
+      // Tambahkan kata normal ke baris aktif dengan status coret yang baru
       barisSaatIni.push({ teks: teksKataMurni, lebar: lebarKataIni, coret: harusDicoretKataIni });
       lebarBarisSaatIni += lebarKataIni;
     });
