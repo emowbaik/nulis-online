@@ -244,8 +244,34 @@ function renderZona(namaZona, teksInput, Skala) {
   // 1. Pecah teks input menjadi paragraf-paragraf (berdasarkan Enter)
   const daftarParagraf = teksInput.split('\n');
 
-  daftarParagraf.forEach(paragraf => {
-    if (!paragraf.trim() && paragraf.length === 0) { posisiY += jarakBaris; return; }
+  for (let idxParagraf = 0; idxParagraf < daftarParagraf.length; idxParagraf++) {
+    const paragraf = daftarParagraf[idxParagraf];
+
+    // ── DETEKSI BLOK TABEL ──
+    if (adalahBarisTabel(paragraf)) {
+      // Kumpulkan semua baris tabel berturutan
+      const blokTabel = [];
+      let j = idxParagraf;
+      while (j < daftarParagraf.length && adalahBarisTabel(daftarParagraf[j])) {
+        blokTabel.push(daftarParagraf[j]);
+        j++;
+      }
+
+      // Render tabel lengkap dan update posisiY
+      const ekstraPaddingTabel = (parseFloat(document.getElementById('angkaTinggiTabel').value) || 0) * Skala;
+      posisiY = renderTabelLengkap(
+        konteks, blokTabel, koordinatXDasar, posisiY,
+        batasLebar, jarakBaris, Skala, konteks.fillStyle, ekstraPaddingTabel
+      );
+
+      // Skip baris-baris yang sudah dikonsumsi sebagai tabel
+      // (-1 karena for loop akan i++ sendiri)
+      idxParagraf = j - 1;
+      continue;
+    }
+
+    // ── PARAGRAF BIASA (kode existing) ──
+    if (!paragraf.trim() && paragraf.length === 0) { posisiY += jarakBaris; continue; }
 
     // 2. Terapkan Preservasi Indentasi (Regex Spasi Awal)
     const kecocokanSpasiAwal = paragraf.match(/^\s*/);
@@ -343,7 +369,7 @@ function renderZona(namaZona, teksInput, Skala) {
       gambarSatuBarisTeks(konteks, barisSaatIni, koordinatXDasar, posisiY, spasiAktif, Skala, ukuranFontInput, jumlahCoretanInput);
       posisiY += jarakBaris;
     }
-  });
+  }
 }
 
 /* ============================================================================

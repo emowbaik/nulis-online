@@ -165,6 +165,14 @@
                 oninput="sinkronInput('angkaSpasi', 'geserSpasi')">
             </div>
           </div>
+          <div class="field"><label>Ketinggian Baris Tabel (Padding)</label>
+            <div class="sl-row">
+              <input type="range" id="geserTinggiTabel" min="-10" max="30" step="0.5" value="0"
+                oninput="sinkronInput('geserTinggiTabel', 'angkaTinggiTabel')">
+              <input type="number" id="angkaTinggiTabel" value="0" step="0.5" min="-10" max="30"
+                oninput="sinkronInput('angkaTinggiTabel', 'geserTinggiTabel')">
+            </div>
+          </div>
         </div>
       </div>
 
@@ -230,6 +238,7 @@
   </div>
 
   <script src="js/faq.js"></script>
+  <script src="js/tabel.js"></script>
   <script src="js/app.js"></script>
 </body>
 

@@ -9,11 +9,50 @@ const faqContent = `
     <li><strong>Simpan Hasil Tulis:</strong> Jika tata letak sudah rapi dan sempurna, klik tombol "Simpan Hasil (.png)" di sudut bawah kiri untuk mendownload hasilnya!</li>
   </ol>
 
+  <hr style="border: none; border-top: 1px solid var(--border); margin: 20px 0;">
+
+  <h3>📊 Cara Membuat Tabel</h3>
+  <p>Anda bisa membuat tabel langsung di kolom <strong>Isi Tulisan</strong> menggunakan format Markdown. Tabel akan otomatis dirender dengan gaya tulisan tangan, lengkap dengan garis grid yang sedikit bergetar (realistis!).</p>
+
+  <h4 style="margin-top: 15px; color: var(--accent2);">✍ Format Penulisan:</h4>
+  <p>Gunakan karakter pipa <code>|</code> sebagai pemisah kolom. Setiap baris tabel harus diawali dan diakhiri dengan <code>|</code>.</p>
+
+  <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 6px; padding: 12px; margin: 10px 0; font-family: monospace; font-size: 13px; line-height: 1.6;">
+    <span style="color: var(--muted);">// Contoh input di textarea:</span><br>
+    | No | Nama Barang | Jumlah |<br>
+    |---|---|---|<br>
+    | 1 &nbsp;| Penggaris &nbsp;&nbsp;| 2 buah |<br>
+    | 2 &nbsp;| Penghapus &nbsp;&nbsp;| 1 buah |<br>
+    | 3 &nbsp;| Buku tulis &nbsp;| 5 buah |
+  </div>
+
+  <h4 style="margin-top: 15px; color: var(--accent2);">📐 Aturan Penting:</h4>
+  <ul style="margin-top: 5px;">
+    <li>Setiap baris tabel <strong>harus diawali</strong> dengan karakter <code>|</code>.</li>
+    <li>Baris pemisah header <code>|---|---|---|</code> bersifat opsional dan akan otomatis di-skip (tidak muncul sebagai baris data).</li>
+    <li>Jumlah kolom boleh tidak konsisten — sistem akan otomatis menyamakan dengan kolom terbanyak.</li>
+    <li>Tabel bisa ditulis <strong>di antara teks biasa</strong>. Teks sebelum dan sesudah tabel tetap dirender normal.</li>
+    <li>Lebar kolom dihitung otomatis berdasarkan isi teks terpanjang di setiap kolom. Jika total lebar melebihi area tulis, kolom akan dikompresi secara proporsional.</li>
+  </ul>
+
+  <h4 style="margin-top: 15px; color: var(--accent2);">🎚 Mengatur Ketinggian Baris Tabel:</h4>
+  <p>Gunakan slider <strong>Ketinggian Baris Tabel (Padding)</strong> di menu <em>Presisi Manual</em> untuk memperbesar atau memperkecil ruang kosong di atas dan bawah teks dalam sel. Cocok untuk menyesuaikan baris tabel agar sejajar dengan garis kertas Anda.</p>
+
+  <hr style="border: none; border-top: 1px solid var(--border); margin: 20px 0;">
+
   <h3>💡 FAQ & Tips Rahasia</h3>
   <ul>
     <li>
       <strong>📝 Bagaimana cara membuat coretan tipe-x / salah tulis (typo)?</strong><br>
       Apit kata atau kalimat yang salah dengan tanda tilde ganda (<code>~~</code>), contoh: <code>~~saya salah ketik~~</code>. Garis coretan yang super realistis akan otomatis dibuat. Tingkat "kebrutalan" coretan bisa diatur melalui slider <strong>Jumlah Coretan Typo</strong>.
+    </li>
+    <li>
+      <strong>📊 Tabel saya terlihat berantakan / garis tidak sejajar dengan kertas?</strong><br>
+      Pastikan Anda sudah melakukan <strong>Kalibrasi Area</strong> terlebih dahulu. Lalu gunakan slider <strong>Ketinggian Baris Tabel (Padding)</strong> untuk menyesuaikan tinggi baris agar pas dengan garis kertas. Coba geser sedikit demi sedikit (0.5 - 1.0) sambil melihat preview secara real-time.
+    </li>
+    <li>
+      <strong>📊 Kolom tabel saya terlalu kecil / teks terpotong?</strong><br>
+      Jika teks di suatu sel terlalu panjang, sistem akan otomatis membungkus teks (word-wrap) di dalam sel. Jika kolom terlalu sempit, coba kurangi jumlah kolom atau perpendek isi sel. Anda juga bisa memperbesar area tulis melalui kalibrasi <strong>Batas Kanan</strong>.
     </li>
     <li>
       <strong>📉 Kenapa baris atas sudah pas, tapi makin ke bawah makin meleset/menabrak garis?</strong><br>
