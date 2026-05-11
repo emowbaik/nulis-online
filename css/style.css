@@ -408,6 +408,35 @@
       box-shadow: none;
     }
 
+    .btn-kalibrasi-tabel {
+      background: linear-gradient(135deg, #ff8c00, #e066ff) !important;
+      color: #fff !important;
+      box-shadow: 0 3px 14px rgba(255, 140, 0, 0.25);
+    }
+
+    .btn-kalibrasi-tabel:hover {
+      box-shadow: 0 5px 22px rgba(255, 140, 0, 0.5);
+    }
+
+    .btn-kalibrasi-tabel:disabled {
+      background: #333 !important;
+      color: #666 !important;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .btn-kalibrasi-tabel.btn-aktif-tabel {
+      background: linear-gradient(135deg, #4cde4c, #2ecc71) !important;
+      color: #000 !important;
+      box-shadow: 0 3px 14px rgba(76, 222, 76, 0.3);
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 3px 14px rgba(76, 222, 76, 0.3); }
+      50% { box-shadow: 0 3px 22px rgba(76, 222, 76, 0.6); }
+    }
+
     #panelNavKalibrasi {
       display: none;
       background: rgba(0, 0, 0, 0.3);

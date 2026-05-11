@@ -1,10 +1,11 @@
 /* ============================================================================
   MESIN TABEL TULISAN TANGAN — NulisOnline
-  File ini berisi 4 engine inti untuk fitur rendering tabel Markdown:
-    Engine 1: Parser Sintaks Markdown
-    Engine 2: Algoritma Pra-Pengukuran (Pre-Measurement)
-    Engine 3: Cell-Bound Word Wrap
-    Engine 4: Pelukis Grid Bergetar (Jittery Grid Drawer)
+  File ini berisi 5 engine inti untuk fitur rendering tabel Markdown:
+    Engine 1  : Parser Sintaks Markdown
+    Engine 1.5: Pemecah String Sel (Cell String Splitter) — sintaks ;;
+    Engine 2  : Algoritma Pra-Pengukuran (Pre-Measurement)
+    Engine 3  : Cell-Bound Word Wrap
+    Engine 4  : Pelukis Grid Bergetar (Jittery Grid Drawer)
 ============================================================================ */
 
 /* ============================================================================
@@ -162,6 +163,56 @@ function wrapTeksDalamSel(teks, lebarMaksimal, ctx) {
 }
 
 /* ============================================================================
+  ENGINE 1.5: PEMECAH STRING SEL (CELL STRING SPLITTER)
+  Memecah isi sel berdasarkan sintaks ;; terlebih dahulu, lalu menerapkan
+  word-wrap pada setiap segmen secara independen.
+
+  HIERARKI PEMROSESAN:
+    1. Pecah string berdasarkan ';;'  → Array segmen
+    2. Untuk setiap segmen, lakukan word-wrap → Array baris
+    3. Gabungkan (flatten) semua baris menjadi satu Array datar
+
+  CONTOH:
+    Input:  "Fitur A;;Ini kalimat panjang yang harus di-wrap"
+    Split:  ["Fitur A", "Ini kalimat panjang yang harus di-wrap"]
+    Wrap:   [["Fitur A"], ["Ini kalimat panjang", "yang harus di-wrap"]]
+    Output: ["Fitur A", "Ini kalimat panjang", "yang harus di-wrap"]
+============================================================================ */
+
+/**
+ * Memecah teks sel berdasarkan ';;' lalu word-wrap setiap segmen.
+ * Menghasilkan array datar (flat) dari semua baris yang siap dicetak.
+ *
+ * @param {string} teks - Isi sel mentah (mungkin mengandung ';;')
+ * @param {number} lebarMaksimal - Lebar area teks dalam sel (piksel)
+ * @param {CanvasRenderingContext2D} ctx - Untuk measureText
+ * @returns {string[]} Array datar berisi baris-baris teks siap cetak
+ */
+function pecahDanWrapSel(teks, lebarMaksimal, ctx) {
+  if (!teks || teks.trim().length === 0) return [''];
+
+  // ── LANGKAH 1: Pecah berdasarkan ';;' ──
+  const segmenMentah = teks.split(';;');
+
+  // ── LANGKAH 2 & 3: Wrap setiap segmen, lalu flatten ──
+  const hasilAkhir = [];
+
+  for (let i = 0; i < segmenMentah.length; i++) {
+    const segmen = segmenMentah[i].trim();
+
+    // Wrap segmen ini secara independen
+    const barisWrapped = wrapTeksDalamSel(segmen, lebarMaksimal, ctx);
+
+    // Gabungkan ke array utama (flatten)
+    for (let j = 0; j < barisWrapped.length; j++) {
+      hasilAkhir.push(barisWrapped[j]);
+    }
+  }
+
+  return hasilAkhir.length > 0 ? hasilAkhir : [''];
+}
+
+/* ============================================================================
   ENGINE 2: ALGORITMA PRA-PENGUKURAN (PRE-MEASUREMENT)
   Menghitung lebar kolom dan tinggi baris sebelum menggambar apapun.
 ============================================================================ */
@@ -183,45 +234,68 @@ function hitungDimensiTabel(dataTabel, ctx, batasLebarTabel, jarakBaris, Skala, 
 
   const { data, jumlahKolom, jumlahBaris } = dataTabel;
 
-  // ── LANGKAH 1: Hitung lebar "ideal" tiap kolom ──
-  const lebarIdeal = new Array(jumlahKolom).fill(0);
+  let lebarKolom;
 
-  for (let c = 0; c < jumlahKolom; c++) {
-    for (let r = 0; r < jumlahBaris; r++) {
-      const lebarTeks = ctx.measureText(data[r][c]).width;
-      if (lebarTeks > lebarIdeal[c]) {
-        lebarIdeal[c] = lebarTeks;
+  // ── CEK APAKAH KALIBRASI TABEL AKTIF ──
+  if (typeof Status !== 'undefined' && Status.tabel && Status.tabel.aktif && Status.tabel.garisX.length > 0) {
+    // Gunakan lebar kolom dari kalibrasi tabel
+    const arr = Status.tabel.garisX;
+    const jumlahKolomKalibrasi = arr.length - 1; // Jumlah kolom = jumlah garis - 1
+
+    lebarKolom = [];
+    for (let c = 0; c < jumlahKolom; c++) {
+      if (c < jumlahKolomKalibrasi) {
+        // Kolom ini memiliki pasangan garis kalibrasi
+        lebarKolom.push(arr[c + 1] - arr[c]);
+      } else {
+        // Kolom data lebih banyak dari kolom kalibrasi, gunakan minimum
+        lebarKolom.push(MIN_LEBAR);
       }
     }
-    // Tambah padding kiri-kanan
-    lebarIdeal[c] += PADDING_X * 2;
-    // Pastikan minimum
-    if (lebarIdeal[c] < MIN_LEBAR) lebarIdeal[c] = MIN_LEBAR;
-  }
-
-  // ── LANGKAH 2: Cek total vs batas kertas ──
-  let totalIdeal = 0;
-  for (let c = 0; c < jumlahKolom; c++) totalIdeal += lebarIdeal[c];
-
-  let lebarKolom;
-  if (totalIdeal <= batasLebarTabel) {
-    lebarKolom = lebarIdeal.slice(); // Muat semua, tidak perlu kompresi
   } else {
-    // Strategi kompresi proporsional
-    const rasioKompresi = batasLebarTabel / totalIdeal;
-    lebarKolom = new Array(jumlahKolom);
+    // ── LANGKAH 1: Hitung lebar "ideal" tiap kolom (mode otomatis) ──
+    const lebarIdeal = new Array(jumlahKolom).fill(0);
+
     for (let c = 0; c < jumlahKolom; c++) {
-      lebarKolom[c] = Math.max(lebarIdeal[c] * rasioKompresi, MIN_LEBAR);
+      for (let r = 0; r < jumlahBaris; r++) {
+        // Untuk pengukuran lebar ideal, cek setiap segmen ;; secara terpisah
+        const segmenSel = data[r][c].split(';;');
+        for (let s = 0; s < segmenSel.length; s++) {
+          const lebarTeks = ctx.measureText(segmenSel[s].trim()).width;
+          if (lebarTeks > lebarIdeal[c]) {
+            lebarIdeal[c] = lebarTeks;
+          }
+        }
+      }
+      // Tambah padding kiri-kanan
+      lebarIdeal[c] += PADDING_X * 2;
+      // Pastikan minimum
+      if (lebarIdeal[c] < MIN_LEBAR) lebarIdeal[c] = MIN_LEBAR;
     }
 
-    // Normalisasi ulang jika masih melebihi setelah floor MIN_LEBAR
-    let totalSetelahKompresi = 0;
-    for (let c = 0; c < jumlahKolom; c++) totalSetelahKompresi += lebarKolom[c];
-    if (totalSetelahKompresi > batasLebarTabel) {
-      // Potong kolom-kolom terlebar secara proporsional
-      const rasioKedua = batasLebarTabel / totalSetelahKompresi;
+    // ── LANGKAH 2: Cek total vs batas kertas ──
+    let totalIdeal = 0;
+    for (let c = 0; c < jumlahKolom; c++) totalIdeal += lebarIdeal[c];
+
+    if (totalIdeal <= batasLebarTabel) {
+      lebarKolom = lebarIdeal.slice(); // Muat semua, tidak perlu kompresi
+    } else {
+      // Strategi kompresi proporsional
+      const rasioKompresi = batasLebarTabel / totalIdeal;
+      lebarKolom = new Array(jumlahKolom);
       for (let c = 0; c < jumlahKolom; c++) {
-        lebarKolom[c] = Math.max(lebarKolom[c] * rasioKedua, MIN_LEBAR * 0.5);
+        lebarKolom[c] = Math.max(lebarIdeal[c] * rasioKompresi, MIN_LEBAR);
+      }
+
+      // Normalisasi ulang jika masih melebihi setelah floor MIN_LEBAR
+      let totalSetelahKompresi = 0;
+      for (let c = 0; c < jumlahKolom; c++) totalSetelahKompresi += lebarKolom[c];
+      if (totalSetelahKompresi > batasLebarTabel) {
+        // Potong kolom-kolom terlebar secara proporsional
+        const rasioKedua = batasLebarTabel / totalSetelahKompresi;
+        for (let c = 0; c < jumlahKolom; c++) {
+          lebarKolom[c] = Math.max(lebarKolom[c] * rasioKedua, MIN_LEBAR * 0.5);
+        }
       }
     }
   }
@@ -236,7 +310,8 @@ function hitungDimensiTabel(dataTabel, ctx, batasLebarTabel, jarakBaris, Skala, 
 
     for (let c = 0; c < jumlahKolom; c++) {
       const lebarIsiSel = lebarKolom[c] - (PADDING_X * 2);
-      const wrappedLines = wrapTeksDalamSel(data[r][c], lebarIsiSel, ctx);
+      // Gunakan pecahDanWrapSel: pecah ;; dulu, baru word-wrap tiap segmen
+      const wrappedLines = pecahDanWrapSel(data[r][c], lebarIsiSel, ctx);
       barisPerSel[r][c] = wrappedLines;
 
       if (wrappedLines.length > maxWrappedLines) {
@@ -430,6 +505,12 @@ function renderTabelLengkap(ctx, barisTabel, koordinatXDasar, posisiY, batasLeba
     return posisiY; // Tidak ada data valid
   }
 
+  // Tentukan posisi X awal: gunakan kalibrasi tabel jika aktif
+  let posisiXAwal = koordinatXDasar;
+  if (typeof Status !== 'undefined' && Status.tabel && Status.tabel.aktif && Status.tabel.garisX.length > 0) {
+    posisiXAwal = Status.tabel.garisX[0];
+  }
+
   // 2. Pre-Measurement (dengan ekstra padding dari slider)
   const dimensi = hitungDimensiTabel(dataTabel, ctx, batasLebar, jarakBaris, Skala, ekstraPadding);
 
@@ -437,10 +518,10 @@ function renderTabelLengkap(ctx, barisTabel, koordinatXDasar, posisiY, batasLeba
   // Grid digeser setengah baris ke ATAS agar garis grid mengapit teks dari atas-bawah.
   // Juga dikurangi setengah ekstraPadding agar padding merata atas-bawah.
   const gridYAwal = posisiY - (jarakBaris / 2) - (ekstraPadding / 2);
-  gambarGridTabel(ctx, dimensi, koordinatXDasar, gridYAwal, Skala, warnaTinta);
+  gambarGridTabel(ctx, dimensi, posisiXAwal, gridYAwal, Skala, warnaTinta);
 
   // 4. Gambar Isi Sel (teks di posisiY, di-center secara vertikal di dalam sel)
-  gambarIsiSelTabel(ctx, dimensi, koordinatXDasar, posisiY, jarakBaris, Skala, ekstraPadding);
+  gambarIsiSelTabel(ctx, dimensi, posisiXAwal, posisiY, jarakBaris, Skala, ekstraPadding);
 
   // 5. Return posisi Y baru (di bawah tabel)
   return posisiY + dimensi.totalTinggi;

@@ -32,7 +32,7 @@ const TINTA_PRESET = [
 const Status = {
   gambarKertas: null,
   cerminKertas: false,
-  modeAplikasi: 'tulis',
+  modeAplikasi: 'tulis', // 'tulis' | 'kalibrasi' | 'kalibrasi-tabel'
   hexTinta: '#1a1209',
   keluargaFont: 'Patrick Hand',
   fontKustom: null,
@@ -41,6 +41,13 @@ const Status = {
     headerKiri: { marginKiri: 44, batasKanan: 250, awalY: 60, yKedua: 92 },
     headerKanan: { marginKiri: 400, batasKanan: 550, awalY: 60, yKedua: 92 },
     konten: { marginKiri: 44, batasKanan: 550, awalY: 150, yKedua: 182 }
+  },
+
+  // --- STATE TABEL (PERSISTENT MEMORY) ---
+  tabel: {
+    aktif: false,         // Apakah kalibrasi tabel sudah pernah dilakukan
+    jumlahKolom: 0,       // Jumlah kolom yang diminta pengguna
+    garisX: []            // Array koordinat X absolut: [x1, x2, x3, ...] — PERMANEN
   }
 };
 
@@ -49,6 +56,12 @@ const Interaksi = {
   lineDragging: null, // Menyimpan ID garis yang sedang di-drag
   activeHandle: null, // Menyimpan ID handle yang di-hover mouse
   hoverLine: null     // Menyimpan ID garis yang di-hover mouse
+};
+
+// --- STATE INTERAKSI DRAG TABEL ---
+const InteraksiTabel = {
+  indexDragging: -1,   // Index garis tabel yang sedang di-drag (-1 = tidak ada)
+  hoverIndex: -1       // Index garis tabel yang di-hover (-1 = tidak ada)
 };
 
 // Ukuran handle (kotak kecil) visual di layar
@@ -196,6 +209,8 @@ function eksekusiGambar() {
     renderZona('konten', document.getElementById('inputKonten').value, skalaTeks);
   } else if (Status.modeAplikasi === 'kalibrasi') {
     renderGarisKalibrasi();
+  } else if (Status.modeAplikasi === 'kalibrasi-tabel') {
+    renderGarisKalibrasiTabel();
   }
 }
 
@@ -528,74 +543,110 @@ Mendeteksi klik, tahan, dan geser kursor pada garis kalibrasi.
 
 // 1. MOUSE DOWN (Mulai Dragging)
 elemenKanvas.addEventListener('mousedown', function (kejadian) {
-  if (Status.modeAplikasi !== 'kalibrasi') return;
+  // --- MODE KALIBRASI TEKS ---
+  if (Status.modeAplikasi === 'kalibrasi') {
+    const pos = dapatkanPosisiCanvas(kejadian);
+    const dataHit = hitTest(pos.x, pos.y);
 
-  const pos = dapatkanPosisiCanvas(kejadian);
-  const dataHit = hitTest(pos.x, pos.y);
+    if (dataHit) {
+      Interaksi.lineDragging = dataHit.propId;
+      Interaksi.initialMousePos = (dataHit.tipe === 'X') ? pos.x : pos.y;
+      Interaksi.initialLinePos = dapatkanNilaiKalibrasi(dataHit.propId);
+    }
+    return;
+  }
 
-  if (dataHit) {
-    // Jika mouse menekan handle atau garis
-    Interaksi.lineDragging = dataHit.propId;
-    Interaksi.initialMousePos = (dataHit.tipe === 'X') ? pos.x : pos.y;
-    Interaksi.initialLinePos = dapatkanNilaiKalibrasi(dataHit.propId);
+  // --- MODE KALIBRASI TABEL ---
+  if (Status.modeAplikasi === 'kalibrasi-tabel') {
+    const pos = dapatkanPosisiCanvas(kejadian);
+    const idx = hitTestTabel(pos.x, pos.y);
+
+    if (idx >= 0) {
+      InteraksiTabel.indexDragging = idx;
+    }
+    return;
   }
 });
 
 // 2. MOUSE MOVE (Proses Dragging & Hover Feedback)
 elemenKanvas.addEventListener('mousemove', function (kejadian) {
-  if (Status.modeAplikasi !== 'kalibrasi') {
-    elemenKanvas.classList.remove('can-drag', 'can-drag-v');
-    Interaksi.hoverLine = null;
-    Interaksi.activeHandle = null;
+  // --- MODE KALIBRASI TEKS ---
+  if (Status.modeAplikasi === 'kalibrasi') {
+    const pos = dapatkanPosisiCanvas(kejadian);
+
+    if (Interaksi.lineDragging) {
+      const propId = Interaksi.lineDragging;
+      const tipe = Interaksi.initialLinePos.tipe;
+      let nilaiBaru = (tipe === 'X') ? pos.x : pos.y;
+      pembaruanNilaiKalibrasi(propId, nilaiBaru);
+      jadwalkanGambarUlang();
+    } else {
+      const dataHit = hitTest(pos.x, pos.y);
+      Interaksi.hoverLine = dataHit ? dataHit.propId : null;
+      Interaksi.activeHandle = (dataHit && dataHit.nearHandle) ? dataHit.propId : null;
+
+      if (dataHit) {
+        if (dataHit.tipe === 'X') {
+          elemenKanvas.classList.remove('can-drag');
+          elemenKanvas.classList.add('can-drag-v');
+        } else {
+          elemenKanvas.classList.remove('can-drag-v');
+          elemenKanvas.classList.add('can-drag');
+        }
+      } else {
+        elemenKanvas.classList.remove('can-drag', 'can-drag-v');
+      }
+      jadwalkanGambarUlang();
+    }
     return;
   }
 
-  const pos = dapatkanPosisiCanvas(kejadian);
+  // --- MODE KALIBRASI TABEL ---
+  if (Status.modeAplikasi === 'kalibrasi-tabel') {
+    const pos = dapatkanPosisiCanvas(kejadian);
 
-  if (Interaksi.lineDragging) {
-    // --- LOGIKA DRAGGING AKTIF ---
-    const propId = Interaksi.lineDragging;
-    const tipe = Interaksi.initialLinePos.tipe;
+    if (InteraksiTabel.indexDragging >= 0) {
+      const idx = InteraksiTabel.indexDragging;
+      const arr = Status.tabel.garisX;
+      const MARGIN_MIN = 15; // Jarak minimum antar garis (dalam piksel kanvas)
 
-    let nilaiBaru;
-    if (tipe === 'X') {
-      nilaiBaru = pos.x;
+      // Batas kiri: garis sebelumnya + margin, atau 0 jika ini garis pertama
+      const batasKiri = (idx > 0) ? arr[idx - 1] + MARGIN_MIN : 0;
+      // Batas kanan: garis sesudahnya - margin, atau lebar kanvas jika ini garis terakhir
+      const batasKanan = (idx < arr.length - 1) ? arr[idx + 1] - MARGIN_MIN : elemenKanvas.width;
+
+      // Clamp nilai baru agar tidak melewati batas
+      arr[idx] = Math.max(batasKiri, Math.min(batasKanan, pos.x));
+      jadwalkanGambarUlang();
     } else {
-      nilaiBaru = pos.y;
-    }
+      const idx = hitTestTabel(pos.x, pos.y);
+      InteraksiTabel.hoverIndex = idx;
 
-    // Terapkan nilai baru ke Status.kalibrasi
-    pembaruanNilaiKalibrasi(propId, nilaiBaru);
-    jadwalkanGambarUlang();
-
-  } else {
-    // --- LOGIKA HOVER (UMPAN BALIK VISUAL) ---
-    const dataHit = hitTest(pos.x, pos.y);
-    Interaksi.hoverLine = dataHit ? dataHit.propId : null;
-    Interaksi.activeHandle = (dataHit && dataHit.nearHandle) ? dataHit.propId : null;
-
-    // Ubah cursor berdasarkan tipe garis yang di-hover
-    if (dataHit) {
-      if (dataHit.tipe === 'X') {
+      if (idx >= 0) {
         elemenKanvas.classList.remove('can-drag');
         elemenKanvas.classList.add('can-drag-v');
       } else {
-        elemenKanvas.classList.remove('can-drag-v');
-        elemenKanvas.classList.add('can-drag');
+        elemenKanvas.classList.remove('can-drag', 'can-drag-v');
       }
-    } else {
-      elemenKanvas.classList.remove('can-drag', 'can-drag-v');
+      jadwalkanGambarUlang();
     }
-
-    // Kita perlu gambar ulang untuk meng-update warna highlight pada hover
-    jadwalkanGambarUlang();
+    return;
   }
+
+  // --- MODE TULIS (reset cursor) ---
+  elemenKanvas.classList.remove('can-drag', 'can-drag-v');
+  Interaksi.hoverLine = null;
+  Interaksi.activeHandle = null;
 });
 
 // 3. MOUSE UP (Selesai Dragging)
 window.addEventListener('mouseup', function () {
-  if (Status.modeAplikasi !== 'kalibrasi') return;
-  Interaksi.lineDragging = null; // Lepas kuncian drag
+  if (Status.modeAplikasi === 'kalibrasi') {
+    Interaksi.lineDragging = null;
+  }
+  if (Status.modeAplikasi === 'kalibrasi-tabel') {
+    InteraksiTabel.indexDragging = -1;
+  }
 });
 
 
@@ -826,6 +877,316 @@ function renderGarisKalibrasi() {
       gambarHandleModern(xOffset, yVal, 'Y', label, warnaBase, isActive);
     });
   }
+}
+
+/* ============================================================================
+5.3 SISTEM KALIBRASI TABEL (HIT-TEST, RENDERING, WORKFLOW)
+============================================================================ */
+
+/**
+ * Hit-test khusus untuk garis vertikal kalibrasi tabel.
+ * @param {number} canvasX - Koordinat X mouse di kanvas
+ * @param {number} canvasY - Koordinat Y mouse di kanvas (tidak dipakai, karena semua garis vertikal)
+ * @returns {number} Index garis yang tertangkap, atau -1 jika tidak ada
+ */
+function hitTestTabel(canvasX, canvasY) {
+  const batasKanvas = elemenKanvas.getBoundingClientRect();
+  const rasioX = elemenKanvas.width / batasKanvas.width;
+  const toleransi = 15 * rasioX;
+
+  for (let i = 0; i < Status.tabel.garisX.length; i++) {
+    const xVal = Status.tabel.garisX[i];
+    if (canvasX > xVal - toleransi && canvasX < xVal + toleransi) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+/**
+ * Menggambar garis-garis vertikal kalibrasi tabel pada kanvas.
+ * Warna Jingga/Ungu agar berbeda dari garis kalibrasi teks (Merah/Hijau/Biru).
+ */
+function renderGarisKalibrasiTabel() {
+  if (Status.tabel.garisX.length === 0) return;
+
+  const batasKanvas = elemenKanvas.getBoundingClientRect();
+  const rasioX = elemenKanvas.width / batasKanvas.width;
+  const rasioY = elemenKanvas.height / batasKanvas.height;
+
+  // Warna gradient Jingga ↔ Ungu berdasarkan posisi garis
+  const warnaGaris = [
+    '#ff8c00', // Jingga terang
+    '#e066ff', // Ungu muda
+    '#ff6347', // Tomat
+    '#9b59b6', // Ungu medium
+    '#ff7043', // Jingga gelap
+    '#ab47bc', // Ungu kuat
+    '#ffb300', // Kuning jingga
+    '#7e57c2', // Ungu tua
+  ];
+
+  const arr = Status.tabel.garisX;
+  const jumlahKolom = Status.tabel.jumlahKolom;
+
+  for (let i = 0; i < arr.length; i++) {
+    const xVal = arr[i];
+    const isActive = (InteraksiTabel.hoverIndex === i || InteraksiTabel.indexDragging === i);
+    const warna = warnaGaris[i % warnaGaris.length];
+
+    konteks.save();
+
+    // 1. Gambar garis vertikal penuh
+    konteks.beginPath();
+    konteks.strokeStyle = isActive ? '#fff' : warna;
+    konteks.lineWidth = isActive ? 2.5 * rasioX : 1.5 * rasioX;
+    konteks.globalAlpha = isActive ? 1.0 : 0.65;
+
+    if (isActive) {
+      konteks.shadowColor = warna;
+      konteks.shadowBlur = 12 * rasioX;
+    }
+
+    konteks.moveTo(xVal, 0);
+    konteks.lineTo(xVal, elemenKanvas.height);
+    konteks.stroke();
+
+    konteks.globalAlpha = 1.0;
+    konteks.shadowBlur = 0;
+
+    // 2. Gambar kapsul handle di tengah vertikal
+    const yMid = elemenKanvas.height / 2;
+    const w = 16 * rasioX;
+    const h = 40 * rasioY;
+    const radius = 8 * Math.min(rasioX, rasioY);
+
+    konteks.shadowColor = 'rgba(0, 0, 0, 0.4)';
+    konteks.shadowBlur = 8 * Math.min(rasioX, rasioY);
+    konteks.shadowOffsetY = 3 * rasioY;
+
+    konteks.fillStyle = isActive ? '#ffffff' : '#f0f4ff';
+    konteks.beginPath();
+    if (konteks.roundRect) {
+      konteks.roundRect(xVal - w / 2, yMid - h / 2, w, h, radius);
+    } else {
+      konteks.rect(xVal - w / 2, yMid - h / 2, w, h);
+    }
+    konteks.fill();
+
+    konteks.shadowColor = 'transparent';
+
+    // 3. Gambar grip dots
+    konteks.fillStyle = isActive ? '#000' : warna;
+    const dotR = 1.5 * Math.min(rasioX, rasioY);
+    const dx = 3 * rasioX;
+    const dy = 7 * rasioY;
+    [-1, 1].forEach(cx => {
+      [-1, 0, 1].forEach(cy => {
+        konteks.beginPath();
+        konteks.arc(xVal + cx * dx, yMid + cy * dy, dotR, 0, Math.PI * 2);
+        konteks.fill();
+      });
+    });
+
+    // 4. Gambar label tooltip (nomor garis & info kolom)
+    let labelTeks;
+    if (i === 0) {
+      labelTeks = `Kiri Tabel`;
+    } else if (i === arr.length - 1) {
+      labelTeks = `Kanan Tabel`;
+    } else {
+      labelTeks = `Kolom ${i}|${i + 1}`;
+    }
+
+    konteks.font = `bold ${10 * rasioY}px sans-serif`;
+    const textW = konteks.measureText(labelTeks).width;
+    const padX = 6 * rasioX;
+    const padY = 4 * rasioY;
+    const tagX = xVal + w / 2 + (8 * rasioX);
+    const tagY = yMid - h / 2 - (22 * rasioY);
+
+    konteks.fillStyle = warna;
+    konteks.beginPath();
+    if (konteks.roundRect) {
+      konteks.roundRect(tagX, tagY, textW + (padX * 2), (10 * rasioY) + (padY * 2), 3 * rasioY);
+    } else {
+      konteks.fillRect(tagX, tagY, textW + (padX * 2), (10 * rasioY) + (padY * 2));
+    }
+    konteks.fill();
+
+    konteks.fillStyle = '#111';
+    konteks.textAlign = 'left';
+    konteks.textBaseline = 'top';
+    konteks.fillText(labelTeks, tagX + padX, tagY + padY);
+
+    konteks.restore();
+  }
+
+  // 5. Gambar label zona kolom (area di antara garis-garis)
+  konteks.save();
+  for (let c = 0; c < jumlahKolom; c++) {
+    const xKiri = arr[c];
+    const xKanan = arr[c + 1];
+    const lebarKolom = xKanan - xKiri;
+    const xCenter = xKiri + lebarKolom / 2;
+    const yLabel = elemenKanvas.height * 0.15;
+
+    // Background semi-transparan
+    konteks.globalAlpha = 0.15;
+    konteks.fillStyle = warnaGaris[c % warnaGaris.length];
+    konteks.fillRect(xKiri, 0, lebarKolom, elemenKanvas.height);
+
+    // Label kolom
+    konteks.globalAlpha = 0.85;
+    konteks.font = `bold ${14 * rasioY}px sans-serif`;
+    konteks.fillStyle = warnaGaris[c % warnaGaris.length];
+    konteks.textAlign = 'center';
+    konteks.textBaseline = 'middle';
+    konteks.fillText(`Kolom ${c + 1}`, xCenter, yLabel);
+
+    // Tampilkan lebar kolom dalam satuan piksel
+    konteks.font = `${10 * rasioY}px sans-serif`;
+    konteks.globalAlpha = 0.6;
+    konteks.fillText(`${Math.round(lebarKolom)} px`, xCenter, yLabel + (18 * rasioY));
+  }
+  konteks.restore();
+}
+
+/* ============================================================================
+5.3a RECONCILIATION ALGORITHM (Penyesuaian Garis Cerdas)
+Menambah/mengurangi garis tabel tanpa mereset posisi yang sudah ada.
+============================================================================ */
+
+/**
+ * Algoritma Penyesuaian Garis Cerdas.
+ * Dipanggil saat pengguna mengubah jumlah kolom via input sidebar.
+ *
+ * - Jika kolom bertambah: Menyuntikkan garis baru di bagian KANAN
+ * - Jika kolom berkurang: Menghapus (pop) garis paling KANAN
+ * - Posisi garis yang sudah ada TIDAK PERNAH di-reset
+ *
+ * @param {number} jumlahBaru - Jumlah kolom baru dari input sidebar
+ */
+function rekonsiliasi(jumlahBaru) {
+  const arr = Status.tabel.garisX;
+  const jumlahGarisBaru = jumlahBaru + 1; // N kolom = N+1 garis
+
+  if (arr.length === 0) {
+    // Inisialisasi pertama kali: distribusi merata
+    const marginKiri = Status.kalibrasi.konten.marginKiri;
+    const batasKanan = Status.kalibrasi.konten.batasKanan;
+    const lebarArea = batasKanan - marginKiri;
+
+    for (let i = 0; i < jumlahGarisBaru; i++) {
+      arr.push(marginKiri + (lebarArea * i / jumlahBaru));
+    }
+  } else if (jumlahGarisBaru > arr.length) {
+    // Kolom BERTAMBAH: Suntikkan garis baru di kanan terakhir
+    const garisKananTerakhir = arr[arr.length - 1];
+    const batasKanan = Status.kalibrasi.konten.batasKanan;
+    const sisaRuang = batasKanan - garisKananTerakhir;
+    const jumlahTambahan = jumlahGarisBaru - arr.length;
+
+    for (let i = 1; i <= jumlahTambahan; i++) {
+      // Distribusikan garis baru secara merata di sisa ruang kanan
+      arr.push(garisKananTerakhir + (sisaRuang * i / (jumlahTambahan + 1)));
+    }
+  } else if (jumlahGarisBaru < arr.length) {
+    // Kolom BERKURANG: Hapus (pop) garis paling kanan
+    while (arr.length > jumlahGarisBaru) {
+      arr.pop();
+    }
+  }
+  // Jika sama, tidak perlu apa-apa
+}
+
+/**
+ * Dipanggil saat pengguna mengubah input jumlah kolom di sidebar.
+ */
+function ubahJumlahKolomTabel() {
+  const input = document.getElementById('inputJumlahKolom');
+  const jumlahBaru = parseInt(input.value) || 0;
+
+  if (jumlahBaru < 0 || jumlahBaru > 20) {
+    input.value = Math.max(0, Math.min(20, jumlahBaru));
+    return;
+  }
+
+  if (jumlahBaru === 0) {
+    // Reset total: kosongkan memori tabel
+    Status.tabel.jumlahKolom = 0;
+    Status.tabel.garisX = [];
+    Status.tabel.aktif = false;
+    // Disable tombol kalibrasi
+    document.getElementById('btnToggleKalibrasiTabel').disabled = true;
+    jadwalkanGambarUlang();
+    return;
+  }
+
+  // Jalankan algoritma penyesuaian cerdas
+  Status.tabel.jumlahKolom = jumlahBaru;
+  rekonsiliasi(jumlahBaru);
+  Status.tabel.aktif = true;
+
+  // Enable tombol kalibrasi
+  document.getElementById('btnToggleKalibrasiTabel').disabled = false;
+
+  jadwalkanGambarUlang();
+}
+
+/**
+ * Toggle masuk/keluar mode kalibrasi tabel.
+ * Garis tetap persisten di posisi terakhir saat keluar.
+ */
+function toggleKalibrasiTabel() {
+  if (Status.modeAplikasi === 'kalibrasi-tabel') {
+    // Sedang aktif → Keluar dari mode kalibrasi
+    selesaiKalibrasiTabel();
+  } else {
+    // Belum aktif → Masuk ke mode kalibrasi
+    mulaiModeKalibrasiTabel();
+  }
+}
+
+/**
+ * Memulai mode kalibrasi tabel (tanpa prompt — data sudah ada di Status.tabel).
+ */
+function mulaiModeKalibrasiTabel() {
+  if (Status.tabel.jumlahKolom < 1 || Status.tabel.garisX.length === 0) {
+    alert('Atur jumlah kolom terlebih dahulu (minimal 1).');
+    return;
+  }
+
+  // Aktifkan mode kalibrasi tabel
+  Status.modeAplikasi = 'kalibrasi-tabel';
+  elemenKanvas.classList.add('mode-ukur');
+
+  // Toggle UI tombol
+  const btn = document.getElementById('btnToggleKalibrasiTabel');
+  btn.textContent = '✅ Selesai Kalibrasi Tabel';
+  btn.classList.add('btn-aktif-tabel');
+
+  jadwalkanGambarUlang();
+}
+
+/**
+ * Menyelesaikan mode kalibrasi tabel dan kembali ke mode tulis.
+ * Garis tetap tersimpan di Status.tabel.garisX.
+ */
+function selesaiKalibrasiTabel() {
+  Status.modeAplikasi = 'tulis';
+  elemenKanvas.classList.remove('mode-ukur');
+
+  // Toggle UI tombol
+  const btn = document.getElementById('btnToggleKalibrasiTabel');
+  btn.textContent = '✏️ Atur Garis Tabel';
+  btn.classList.remove('btn-aktif-tabel');
+
+  // Reset interaksi
+  InteraksiTabel.indexDragging = -1;
+  InteraksiTabel.hoverIndex = -1;
+
+  jadwalkanGambarUlang();
 }
 
 /* ============================================================================
