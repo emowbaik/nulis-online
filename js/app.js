@@ -276,7 +276,8 @@ function renderZona(namaZona, teksInput, Skala) {
       const ekstraPaddingTabel = (parseFloat(document.getElementById('angkaTinggiTabel').value) || 0) * Skala;
       posisiY = renderTabelLengkap(
         konteks, blokTabel, koordinatXDasar, posisiY,
-        batasLebar, jarakBaris, Skala, konteks.fillStyle, ekstraPaddingTabel
+        batasLebar, jarakBaris, Skala, konteks.fillStyle, ekstraPaddingTabel,
+        ukuranFontInput, jumlahCoretanInput
       );
 
       // Skip baris-baris yang sudah dikonsumsi sebagai tabel

@@ -104,53 +104,67 @@ function wrapTeksDalamSel(teks, lebarMaksimal, ctx) {
   if (!teks || teks.trim().length === 0) return [''];
   if (lebarMaksimal <= 0) return [teks];
 
-  const kataKata = teks.split(' ');
+  // Dual arrays: kataAsli preserves ~~ markers, kataBersih for measurement
+  const kataAsli = teks.trim().split(/\s+/);
+  const kataBersih = kataAsli.map(k => k.replace(/~~/g, ''));
   const hasil = [];
-  let barisSaatIni = '';
+  let barisSaatIni = '';      // Output line (preserves ~~)
+  let barisBersih = '';       // Shadow line for measurement (no ~~)
 
-  for (let i = 0; i < kataKata.length; i++) {
-    const kata = kataKata[i];
-    const tesString = barisSaatIni.length > 0 ? barisSaatIni + ' ' + kata : kata;
-    const lebarTes = ctx.measureText(tesString).width;
+  for (let i = 0; i < kataAsli.length; i++) {
+    const asli = kataAsli[i];
+    const bersih = kataBersih[i];
+
+    const tesBersih = barisBersih.length > 0 ? barisBersih + ' ' + bersih : bersih;
+    const tesAsli = barisSaatIni.length > 0 ? barisSaatIni + ' ' + asli : asli;
+    const lebarTes = ctx.measureText(tesBersih).width;
 
     if (lebarTes > lebarMaksimal && barisSaatIni.length > 0) {
       // Baris saat ini sudah penuh, simpan dan mulai baru
       hasil.push(barisSaatIni);
       barisSaatIni = '';
+      barisBersih = '';
 
       // Cek apakah kata tunggal melebihi lebar
-      const lebarKataSendiri = ctx.measureText(kata).width;
+      const lebarKataSendiri = ctx.measureText(bersih).width;
       if (lebarKataSendiri > lebarMaksimal) {
-        // Pecah per karakter
+        // Pecah per karakter (gunakan versi asli agar ~~ di tengah tetap utuh)
         let stringSementara = '';
-        for (let j = 0; j < kata.length; j++) {
-          const charTes = stringSementara + kata[j];
-          if (ctx.measureText(charTes).width > lebarMaksimal && stringSementara.length > 0) {
+        for (let j = 0; j < asli.length; j++) {
+          const charTes = stringSementara + asli[j];
+          // Ukur tanpa ~~ untuk keputusan wrap
+          const charTesBersih = charTes.replace(/~~/g, '');
+          if (ctx.measureText(charTesBersih).width > lebarMaksimal && stringSementara.length > 0) {
             hasil.push(stringSementara);
-            stringSementara = kata[j];
+            stringSementara = asli[j];
           } else {
             stringSementara = charTes;
           }
         }
         barisSaatIni = stringSementara;
+        barisBersih = stringSementara.replace(/~~/g, '');
       } else {
-        barisSaatIni = kata;
+        barisSaatIni = asli;
+        barisBersih = bersih;
       }
-    } else if (barisSaatIni.length === 0 && ctx.measureText(kata).width > lebarMaksimal) {
+    } else if (barisSaatIni.length === 0 && ctx.measureText(bersih).width > lebarMaksimal) {
       // Kata pertama di baris sudah melebihi lebar → pecah per karakter
       let stringSementara = '';
-      for (let j = 0; j < kata.length; j++) {
-        const charTes = stringSementara + kata[j];
-        if (ctx.measureText(charTes).width > lebarMaksimal && stringSementara.length > 0) {
+      for (let j = 0; j < asli.length; j++) {
+        const charTes = stringSementara + asli[j];
+        const charTesBersih = charTes.replace(/~~/g, '');
+        if (ctx.measureText(charTesBersih).width > lebarMaksimal && stringSementara.length > 0) {
           hasil.push(stringSementara);
-          stringSementara = kata[j];
+          stringSementara = asli[j];
         } else {
           stringSementara = charTes;
         }
       }
       barisSaatIni = stringSementara;
+      barisBersih = stringSementara.replace(/~~/g, '');
     } else {
-      barisSaatIni = tesString;
+      barisSaatIni = tesAsli;
+      barisBersih = tesBersih;
     }
   }
 
@@ -261,7 +275,7 @@ function hitungDimensiTabel(dataTabel, ctx, batasLebarTabel, jarakBaris, Skala, 
         // Untuk pengukuran lebar ideal, cek setiap segmen ;; secara terpisah
         const segmenSel = data[r][c].split(';;');
         for (let s = 0; s < segmenSel.length; s++) {
-          const lebarTeks = ctx.measureText(segmenSel[s].trim()).width;
+          const lebarTeks = ctx.measureText(segmenSel[s].trim().replace(/~~/g, '')).width;
           if (lebarTeks > lebarIdeal[c]) {
             lebarIdeal[c] = lebarTeks;
           }
@@ -430,15 +444,62 @@ function gambarGridTabel(ctx, dimensi, posisiXAwal, posisiYAwal, Skala, warnaTin
 /* ============================================================================
   FUNGSI RENDERING ISI SEL
   Mengisi setiap sel tabel dengan teks (top-aligned).
-  Semua sel di baris yang sama memulai teks dari Y yang IDENTIK,
-  yaitu tepat di garis atas baris tersebut (Whitespace Ignorance).
+  Mendukung sintaks ~~ (strikethrough) dengan mendelegasikan
+  rendering ke gambarSatuBarisTeks() dari mesin teks utama.
 ============================================================================ */
+
+/**
+ * Mem-parse satu baris teks sel menjadi array objek kata
+ * dengan flag `coret`, kompatibel dengan gambarSatuBarisTeks().
+ *
+ * @param {string} barisTeks - Satu baris teks dalam sel (sudah di-wrap)
+ * @param {CanvasRenderingContext2D} ctx - Untuk measureText
+ * @returns {{teks: string, lebar: number, coret: boolean}[]}
+ */
+function parseBarisSelKeObjekKata(barisTeks, ctx) {
+  if (!barisTeks || barisTeks.trim().length === 0) return [];
+
+  // Trim dan split menjadi kata-kata (token) berdasarkan spasi
+  const kataArray = barisTeks.trim().split(/\s+/);
+  const hasil = [];
+  let modeCoretAktif = false;
+
+  for (let i = 0; i < kataArray.length; i++) {
+    let teksKata = kataArray[i];
+    if (teksKata.length === 0) continue;
+
+    // A. Jika kata berawalan ~~, nyalakan mode coret
+    if (teksKata.startsWith('~~')) {
+      modeCoretAktif = true;
+      teksKata = teksKata.slice(2); // Buang ~~ pembuka
+    }
+
+    // B. Rekam status coret untuk kata ini SEBELUM dicek penutupnya
+    let harusDicoret = modeCoretAktif;
+
+    // C. Jika kata berakhiran ~~, buang ~~ penutup dan matikan mode
+    if (teksKata.endsWith('~~')) {
+      teksKata = teksKata.slice(0, -2); // Buang ~~ penutup
+      modeCoretAktif = false;
+    }
+
+    // D. Jika setelah strip ~~ kata menjadi kosong, skip
+    if (teksKata.length === 0) continue;
+
+    hasil.push({
+      teks: teksKata,
+      lebar: ctx.measureText(' ' + teksKata).width, // Lebar termasuk spasi prefix
+      coret: harusDicoret
+    });
+  }
+
+  return hasil;
+}
 
 /**
  * Mengisi setiap sel tabel dengan teks.
  * Strategi Y-Axis: TOP-ANCHORED (bukan center).
- * Teks selalu "menggantung" dari garis batas atas sel.
- * Sisa ruang kosong di bawah dibiarkan bolong (Whitespace Ignorance).
+ * Mendukung sintaks ~~ (strikethrough) via gambarSatuBarisTeks().
  *
  * @param {CanvasRenderingContext2D} ctx
  * @param {{lebarKolom: number[], tinggiPerBaris: number[], barisPerSel: string[][][]}} dimensi
@@ -447,8 +508,10 @@ function gambarGridTabel(ctx, dimensi, posisiXAwal, posisiYAwal, Skala, warnaTin
  * @param {number} jarakBaris
  * @param {number} Skala
  * @param {number} ekstraPadding - Padding vertikal tambahan dari slider
+ * @param {number} fontSize - Ukuran font aktif (untuk ketebalan garis coretan)
+ * @param {number} jumlahCoretan - Jumlah lapisan garis coretan typo
  */
-function gambarIsiSelTabel(ctx, dimensi, posisiXAwal, posisiYAwal, jarakBaris, Skala, ekstraPadding) {
+function gambarIsiSelTabel(ctx, dimensi, posisiXAwal, posisiYAwal, jarakBaris, Skala, ekstraPadding, fontSize, jumlahCoretan) {
   const { lebarKolom, tinggiPerBaris, barisPerSel } = dimensi;
   const PADDING_X = TABEL_PADDING_X_FAKTOR * Skala;
 
@@ -462,16 +525,18 @@ function gambarIsiSelTabel(ctx, dimensi, posisiXAwal, posisiYAwal, jarakBaris, S
       const xTeks = xKolom + PADDING_X;
 
       // ── TOP-ANCHORED Y: Semua sel mulai dari Y yang sama ──
-      // Tidak ada offsetSentering. Teks dimulai tepat dari garis atas baris.
-      // Ruang kosong di bawah teks pendek dibiarkan bolong (Whitespace Ignorance).
-
       for (let w = 0; w < barisTeksSel.length; w++) {
         const yTeks = yBaris + (w * jarakBaris);
 
-        // Jitter vertikal (realisme tangan manusia)
-        const jitterY = (Math.random() - 0.5) * (2 * Skala);
+        // Parse baris teks menjadi objek kata (dengan flag coret)
+        const objekKata = parseBarisSelKeObjekKata(barisTeksSel[w], ctx);
 
-        ctx.fillText(barisTeksSel[w], xTeks, yTeks + jitterY);
+        if (objekKata.length > 0) {
+          // Delegasikan ke mesin teks utama (sudah punya logika ~~ lengkap)
+          gambarSatuBarisTeks(ctx, objekKata, xTeks, yTeks, '', Skala, fontSize, jumlahCoretan);
+        } else {
+          // Baris kosong, tidak perlu digambar
+        }
       }
 
       xKolom += lebarKolom[c];
@@ -497,10 +562,14 @@ function gambarIsiSelTabel(ctx, dimensi, posisiXAwal, posisiYAwal, jarakBaris, S
  * @param {number} Skala
  * @param {string} warnaTinta - fillStyle aktif
  * @param {number} [ekstraPadding=0] - Padding vertikal tambahan dari slider
+ * @param {number} [fontSize=20] - Ukuran font aktif
+ * @param {number} [jumlahCoretan=1] - Jumlah lapisan garis coretan typo
  * @returns {number} posisiY baru (di bawah tabel)
  */
-function renderTabelLengkap(ctx, barisTabel, koordinatXDasar, posisiY, batasLebar, jarakBaris, Skala, warnaTinta, ekstraPadding) {
+function renderTabelLengkap(ctx, barisTabel, koordinatXDasar, posisiY, batasLebar, jarakBaris, Skala, warnaTinta, ekstraPadding, fontSize, jumlahCoretan) {
   ekstraPadding = ekstraPadding || 0;
+  fontSize = fontSize || 20;
+  jumlahCoretan = jumlahCoretan || 1;
 
   // 1. Parse
   const dataTabel = parseTabelMarkdown(barisTabel);
@@ -523,8 +592,8 @@ function renderTabelLengkap(ctx, barisTabel, koordinatXDasar, posisiY, batasLeba
   const gridYAwal = posisiY - (jarakBaris / 2) - (ekstraPadding / 2);
   gambarGridTabel(ctx, dimensi, posisiXAwal, gridYAwal, Skala, warnaTinta);
 
-  // 4. Gambar Isi Sel (teks di posisiY, di-center secara vertikal di dalam sel)
-  gambarIsiSelTabel(ctx, dimensi, posisiXAwal, posisiY, jarakBaris, Skala, ekstraPadding);
+  // 4. Gambar Isi Sel (teks + strikethrough via gambarSatuBarisTeks)
+  gambarIsiSelTabel(ctx, dimensi, posisiXAwal, posisiY, jarakBaris, Skala, ekstraPadding, fontSize, jumlahCoretan);
 
   // 5. Return posisi Y baru (di bawah tabel)
   return posisiY + dimensi.totalTinggi;
