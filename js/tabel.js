@@ -354,48 +354,102 @@ function hitungDimensiTabel(dataTabel, ctx, batasLebarTabel, jarakBaris, Skala, 
 }
 
 /* ============================================================================
-  ENGINE 4: PELUKIS GRID BERGETAR (JITTERY GRID DRAWER)
-  Menggambar garis tabel dengan efek tangan manusia.
+  ENGINE 4: PELUKIS GRID TANGAN BEBAS (HAND-DRAWN GRID ENGINE)
+  Menggambar garis tabel dengan efek "tanpa penggaris".
+  
+  Komponen:
+  - gambarGarisTangan(): Segmented Line Drawing Algorithm (jantung utama)
+  - gambarGridTabel():   Orkestrator yang memanggil gambarGarisTangan()
+  
+  3 Parameter Independen (masing-masing 0-100):
+    levelDrift     = Kemiringan ujung-ke-ujung (macro tilt)
+    levelOvershoot = Perpanjangan garis melewati batas kotak
+    levelWobble    = Getaran mikro di tengah tarikan garis
 ============================================================================ */
 
 /**
- * Menggambar satu garis lurus dengan efek jitter tangan manusia.
+ * SEGMENTED LINE DRAWING ALGORITHM
+ * Menggambar satu garis dengan efek tangan bebas.
+ * 3 efek dikendalikan secara independen.
+ *
  * @param {CanvasRenderingContext2D} ctx
- * @param {number} x1 - Koordinat X awal
- * @param {number} y1 - Koordinat Y awal
- * @param {number} x2 - Koordinat X akhir
- * @param {number} y2 - Koordinat Y akhir
+ * @param {number} x1 - Koordinat X awal (ideal)
+ * @param {number} y1 - Koordinat Y awal (ideal)
+ * @param {number} x2 - Koordinat X akhir (ideal)
+ * @param {number} y2 - Koordinat Y akhir (ideal)
  * @param {number} Skala
  * @param {string} warnaGaris
+ * @param {number} levelDrift     - 0-100: Kemiringan garis (slant)
+ * @param {number} levelOvershoot - 0-100: Bablas melewati batas kotak
+ * @param {number} levelWobble    - 0-100: Getaran mikro di tengah garis
  */
-function gambarGarisJitter(ctx, x1, y1, x2, y2, Skala, warnaGaris) {
+function gambarGarisTangan(ctx, x1, y1, x2, y2, Skala, warnaGaris, levelDrift, levelOvershoot, levelWobble) {
   ctx.save();
   ctx.strokeStyle = warnaGaris;
 
-  // Variasi ketebalan garis (seperti penggaris yang sedikit bergerak)
+  // Normalisasi faktor: karena max input sekarang 100, kita bagi dengan 10.
+  // Artinya jika level=10 -> faktor=1.0. Jika level=100 -> faktor=10.0 (efek sangat ekstrem)
+  // Pastikan jika <= 0 benar-benar 0 mutlak untuk hasil garis lurus sempurna.
+  const fDrift = (levelDrift > 0) ? levelDrift / 10 : 0;
+  const fOvershoot = (levelOvershoot > 0) ? levelOvershoot / 10 : 0;
+  const fWobble = (levelWobble > 0) ? levelWobble / 10 : 0;
+  const fGabungan = Math.max(fDrift, fOvershoot, fWobble);
+
+  // ── 1. VARIASI KETEBALAN GARIS ──
   const tebalDasar = 0.8 * Skala;
-  const acakTebal = (Math.random() - 0.5) * (Skala * 0.4);
+  const acakTebal = (fGabungan > 0) ? (Math.random() - 0.5) * (Skala * 0.4) * fGabungan : 0;
   ctx.lineWidth = Math.max(0.3, tebalDasar + acakTebal);
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
 
-  // Amplitudo jitter (lebih kecil dari coretan ~~, lebih presisi seperti penggaris)
-  const amplitudo = 1.5 * Skala;
+  // Hitung properti geometri garis
+  const panjangGaris = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+  const dx = panjangGaris > 0 ? (x2 - x1) / panjangGaris : 0;
+  const dy = panjangGaris > 0 ? (y2 - y1) / panjangGaris : 0;
+  const nx = -dy; // Normal vektor (tegak lurus garis)
+  const ny = dx;
 
-  // Jitter independen di titik awal dan akhir
-  const jStartX = (Math.random() - 0.5) * amplitudo;
-  const jStartY = (Math.random() - 0.5) * amplitudo;
-  const jEndX = (Math.random() - 0.5) * amplitudo;
-  const jEndY = (Math.random() - 0.5) * amplitudo;
+  // ── 2. OVERSHOOT ENGINE (Tarikan Bablas) ──
+  const overshootMax = Math.min(panjangGaris * 0.03, 6 * Skala) * fOvershoot;
+  const overshootAwal = (fOvershoot > 0) ? Math.random() * overshootMax : 0;
+  const overshootAkhir = (fOvershoot > 0) ? Math.random() * overshootMax : 0;
+
+  const ax1 = x1 - dx * overshootAwal;
+  const ay1 = y1 - dy * overshootAwal;
+  const ax2 = x2 + dx * overshootAkhir;
+  const ay2 = y2 + dy * overshootAkhir;
+
+  // ── 3. MACRO-DRIFT GENERATOR (Kemiringan) ──
+  const driftMax = 3.0 * Skala * fDrift;
+  const driftAwal = (fDrift > 0) ? (Math.random() - 0.5) * driftMax : 0;
+  const driftAkhir = (fDrift > 0) ? (Math.random() - 0.5) * driftMax : 0;
+
+  const startX = ax1 + nx * driftAwal;
+  const startY = ay1 + ny * driftAwal;
+  const endX = ax2 + nx * driftAkhir;
+  const endY = ay2 + ny * driftAkhir;
+
+  // ── 4. SEGMENTED LINE DRAWING (Wobble / Getaran Mikro) ──
+  // Jika wobble = 0, cukup 1 segmen lurus. Jika > 0, pecah jadi 8-70 segmen
+  const jumlahSegmen = (fWobble > 0) ? Math.max(3, Math.floor(8 + fWobble * 7)) : 1;
+  const microJitterMax = 1.5 * Skala * fWobble;
 
   ctx.beginPath();
-  ctx.moveTo(x1 + jStartX, y1 + jStartY);
+  ctx.moveTo(startX, startY);
 
-  // Tambahkan 1-2 titik kontrol untuk efek garis sedikit melengkung (seperti digaris tangan)
-  const midX = (x1 + x2) / 2;
-  const midY = (y1 + y2) / 2;
-  const jMidX = (Math.random() - 0.5) * amplitudo * 0.7;
-  const jMidY = (Math.random() - 0.5) * amplitudo * 0.7;
+  for (let s = 1; s <= jumlahSegmen; s++) {
+    const t = s / jumlahSegmen;
+    const baseX = startX + (endX - startX) * t;
+    const baseY = startY + (endY - startY) * t;
 
-  ctx.quadraticCurveTo(midX + jMidX, midY + jMidY, x2 + jEndX, y2 + jEndY);
+    if (s < jumlahSegmen && fWobble > 0) {
+      const microJitter = (Math.random() - 0.5) * microJitterMax * 2;
+      ctx.lineTo(baseX + nx * microJitter, baseY + ny * microJitter);
+    } else {
+      ctx.lineTo(endX, endY);
+    }
+  }
+
   ctx.stroke();
   ctx.restore();
 }
@@ -404,36 +458,39 @@ function gambarGarisJitter(ctx, x1, y1, x2, y2, Skala, warnaGaris) {
  * Menggambar keseluruhan grid tabel (garis horizontal + vertikal).
  * @param {CanvasRenderingContext2D} ctx
  * @param {{lebarKolom: number[], tinggiPerBaris: number[], totalLebar: number, totalTinggi: number}} dimensi
- * @param {number} posisiXAwal - Koordinat X kiri tabel
- * @param {number} posisiYAwal - Koordinat Y atas tabel
+ * @param {number} posisiXAwal
+ * @param {number} posisiYAwal
  * @param {number} Skala
  * @param {string} warnaTinta
+ * @param {number} levelDrift
+ * @param {number} levelOvershoot
+ * @param {number} levelWobble
  */
-function gambarGridTabel(ctx, dimensi, posisiXAwal, posisiYAwal, Skala, warnaTinta) {
+function gambarGridTabel(ctx, dimensi, posisiXAwal, posisiYAwal, Skala, warnaTinta, levelDrift, levelOvershoot, levelWobble) {
   const { lebarKolom, tinggiPerBaris, totalLebar, totalTinggi } = dimensi;
 
-  // ── GARIS HORIZONTAL (batas atas setiap baris + batas bawah tabel) ──
+  // ── GARIS HORIZONTAL ──
   let yAkumulasi = posisiYAwal;
   for (let r = 0; r <= tinggiPerBaris.length; r++) {
-    gambarGarisJitter(
+    gambarGarisTangan(
       ctx,
       posisiXAwal, yAkumulasi,
       posisiXAwal + totalLebar, yAkumulasi,
-      Skala, warnaTinta
+      Skala, warnaTinta, levelDrift, levelOvershoot, levelWobble
     );
     if (r < tinggiPerBaris.length) {
       yAkumulasi += tinggiPerBaris[r];
     }
   }
 
-  // ── GARIS VERTIKAL (batas kiri setiap kolom + batas kanan tabel) ──
+  // ── GARIS VERTIKAL ──
   let xAkumulasi = posisiXAwal;
   for (let c = 0; c <= lebarKolom.length; c++) {
-    gambarGarisJitter(
+    gambarGarisTangan(
       ctx,
       xAkumulasi, posisiYAwal,
       xAkumulasi, posisiYAwal + totalTinggi,
-      Skala, warnaTinta
+      Skala, warnaTinta, levelDrift, levelOvershoot, levelWobble
     );
     if (c < lebarKolom.length) {
       xAkumulasi += lebarKolom[c];
@@ -564,12 +621,18 @@ function gambarIsiSelTabel(ctx, dimensi, posisiXAwal, posisiYAwal, jarakBaris, S
  * @param {number} [ekstraPadding=0] - Padding vertikal tambahan dari slider
  * @param {number} [fontSize=20] - Ukuran font aktif
  * @param {number} [jumlahCoretan=1] - Jumlah lapisan garis coretan typo
+ * @param {number} [levelDrift=0] - Kemiringan garis tabel (0-100)
+ * @param {number} [levelOvershoot=0] - Tarikan bablas garis tabel (0-100)
+ * @param {number} [levelWobble=0] - Getaran mikro garis tabel (0-100)
  * @returns {number} posisiY baru (di bawah tabel)
  */
-function renderTabelLengkap(ctx, barisTabel, koordinatXDasar, posisiY, batasLebar, jarakBaris, Skala, warnaTinta, ekstraPadding, fontSize, jumlahCoretan) {
+function renderTabelLengkap(ctx, barisTabel, koordinatXDasar, posisiY, batasLebar, jarakBaris, Skala, warnaTinta, ekstraPadding, fontSize, jumlahCoretan, levelDrift, levelOvershoot, levelWobble) {
   ekstraPadding = ekstraPadding || 0;
   fontSize = fontSize || 20;
   jumlahCoretan = jumlahCoretan || 1;
+  levelDrift = levelDrift || 0;
+  levelOvershoot = levelOvershoot || 0;
+  levelWobble = levelWobble || 0;
 
   // 1. Parse
   const dataTabel = parseTabelMarkdown(barisTabel);
@@ -590,7 +653,7 @@ function renderTabelLengkap(ctx, barisTabel, koordinatXDasar, posisiY, batasLeba
   // Grid digeser setengah baris ke ATAS agar garis grid mengapit teks dari atas-bawah.
   // Juga dikurangi setengah ekstraPadding agar padding merata atas-bawah.
   const gridYAwal = posisiY - (jarakBaris / 2) - (ekstraPadding / 2);
-  gambarGridTabel(ctx, dimensi, posisiXAwal, gridYAwal, Skala, warnaTinta);
+  gambarGridTabel(ctx, dimensi, posisiXAwal, gridYAwal, Skala, warnaTinta, levelDrift, levelOvershoot, levelWobble);
 
   // 4. Gambar Isi Sel (teks + strikethrough via gambarSatuBarisTeks)
   gambarIsiSelTabel(ctx, dimensi, posisiXAwal, posisiY, jarakBaris, Skala, ekstraPadding, fontSize, jumlahCoretan);

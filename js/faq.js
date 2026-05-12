@@ -22,6 +22,12 @@ const faqContent = `
         <div style="font-size: 13px; color: #ccc;">Menambah kolom? Garis lama <strong style="color: #2ecc71;">tidak akan ter-reset!</strong> Sistem hanya menambahkan garis baru di sisi kanan. Mengurangi? Garis paling kanan dihapus. Kalibrasi lama Anda aman.</div>
       </div>
 
+      <!-- Fitur 3.5: Gaya Garis Tangan Bebas -->
+      <div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 12px; border-left: 3px solid #ff4757;">
+        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #ff4757; margin-bottom: 4px; font-weight: bold;">✍️ Gaya Garis Tangan Bebas (Baru!)</div>
+        <div style="font-size: 13px; color: #ccc;">Buat tabel yang terlihat digambar tanpa penggaris! Atur tingkat <strong>Kemiringan (Drift)</strong>, <strong>Tarikan Bablas (Overshoot)</strong>, dan <strong>Getaran Mikro (Wobble)</strong> secara independen untuk hasil yang sangat realistis.</div>
+      </div>
+
       <!-- Fitur 4: Save/Load Preset -->
       <div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 12px; border-left: 3px solid #4a90d9;">
         <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #4a90d9; margin-bottom: 4px; font-weight: bold;">💾 Simpan & Muat Preset</div>
@@ -94,6 +100,17 @@ const faqContent = `
   </div>
   <p>Sel <code>Login;;Register;;Logout</code> akan tercetak sebagai 3 baris terpisah di dalam satu kotak sel, sementara sel "No" dan "Status" tetap normal. Tinggi baris otomatis menyesuaikan.</p>
 
+  <h4 style="margin-top: 15px; color: #ff4757;">✍️ Gaya Garis Tangan Bebas (Baru!):</h4>
+  <p>Anda bisa mengatur tingkat "kekacauan" garis tabel agar terlihat seperti digambar manual (tanpa penggaris). Buka section <strong>📊 Pengaturan Tabel</strong> dan atur ketiga slider ini (0-100):</p>
+  <ul style="margin-top: 5px;">
+    <li><strong>Drift (Kemiringan):</strong> Membuat ujung garis sedikit miring (tidak sejajar sempurna).</li>
+    <li><strong>Overshoot (Tarikan Bablas):</strong> Garis tabel akan ditarik berlebih melewati sudut persimpangan.</li>
+    <li><strong>Wobble (Getaran Mikro):</strong> Tarikan garis akan sedikit meliuk-liuk atau bergelombang di tengah.</li>
+  </ul>
+  <div style="background: rgba(255,71,87,0.1); border: 1px solid rgba(255,71,87,0.3); border-radius: 6px; padding: 10px 12px; margin: 10px 0; font-size: 12px; color: #ff4757;">
+    💡 <strong>Tips:</strong> Untuk hasil alami "pakai penggaris tapi tangan getar", setel Drift=0, Overshoot=5, Wobble=15. Untuk efek "tanpa penggaris", setel ketiganya di angka 50-80. Jika semuanya disetel ke 0, garis akan lurus sempurna secara digital!
+  </div>
+
   <h4 style="margin-top: 15px; color: var(--accent2);">🎚 Mengatur Ketinggian Baris Tabel:</h4>
   <p>Gunakan slider <strong>Ketinggian Baris Tabel (Padding)</strong> di menu <em>Presisi Manual</em> untuk memperbesar atau memperkecil ruang kosong di atas dan bawah teks dalam sel. Cocok untuk menyesuaikan baris tabel agar sejajar dengan garis kertas Anda.</p>
 
@@ -139,6 +156,10 @@ const faqContent = `
     <li>
       <strong>📊 Kolom tabel saya terlalu kecil / teks terpotong?</strong><br>
       Gunakan fitur <strong>📊 Kalibrasi Tabel</strong> di sidebar! Atur jumlah kolom, lalu geser garis pembatas di kanvas untuk memperlebar kolom yang terlalu sempit. Jika tidak menggunakan kalibrasi, sistem akan otomatis mendistribusikan lebar secara proporsional.
+    </li>
+    <li>
+      <strong>📊 Kenapa garis tabel saya lurus dan kaku banget seperti bikinan komputer?</strong><br>
+      Buka bagian <strong>Pengaturan Tabel</strong> di sidebar dan naikkan angka pada slider <strong>Drift</strong>, <strong>Overshoot</strong>, dan <strong>Wobble</strong>! Fitur <em>Gaya Garis Tangan Bebas</em> ini akan merusak kesempurnaan garis secara cerdas sehingga terlihat 100% natural seperti ditarik menggunakan pulpen.
     </li>
     <li>
       <strong>📊 Saya menambah kolom tapi posisi garis lama hilang / ter-reset?</strong><br>

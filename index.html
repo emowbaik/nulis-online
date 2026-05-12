@@ -140,6 +140,34 @@
           ✏️ Atur Garis Tabel
         </button>
 
+        <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border);">
+          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent2); margin-bottom: 8px; font-weight: bold;">✍ Gaya Garis Tangan Bebas</div>
+          <div class="field"><label>Drift (Kemiringan)</label>
+            <div class="sl-row">
+              <input type="range" id="geserDrift" min="0" max="100" step="1" value="0"
+                oninput="sinkronInput('geserDrift', 'angkaDrift')">
+              <input type="number" id="angkaDrift" value="0" min="0" max="100"
+                oninput="sinkronInput('angkaDrift', 'geserDrift')">
+            </div>
+          </div>
+          <div class="field"><label>Overshoot (Tarikan Bablas)</label>
+            <div class="sl-row">
+              <input type="range" id="geserOvershoot" min="0" max="100" step="1" value="0"
+                oninput="sinkronInput('geserOvershoot', 'angkaOvershoot')">
+              <input type="number" id="angkaOvershoot" value="0" min="0" max="100"
+                oninput="sinkronInput('angkaOvershoot', 'geserOvershoot')">
+            </div>
+          </div>
+          <div class="field"><label>Wobble (Getaran Mikro)</label>
+            <div class="sl-row">
+              <input type="range" id="geserWobble" min="0" max="100" step="1" value="0"
+                oninput="sinkronInput('geserWobble', 'angkaWobble')">
+              <input type="number" id="angkaWobble" value="0" min="0" max="100"
+                oninput="sinkronInput('angkaWobble', 'geserWobble')">
+            </div>
+          </div>
+        </div>
+
         <div
           style="margin-top: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,140,0,0.2); padding: 10px; border-radius: 6px; font-size: 11px; color: var(--muted); line-height: 1.5;">
           <div

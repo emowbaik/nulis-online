@@ -274,10 +274,13 @@ function renderZona(namaZona, teksInput, Skala) {
 
       // Render tabel lengkap dan update posisiY
       const ekstraPaddingTabel = (parseFloat(document.getElementById('angkaTinggiTabel').value) || 0) * Skala;
+      const levelDrift = parseInt(document.getElementById('angkaDrift').value) || 0;
+      const levelOvershoot = parseInt(document.getElementById('angkaOvershoot').value) || 0;
+      const levelWobble = parseInt(document.getElementById('angkaWobble').value) || 0;
       posisiY = renderTabelLengkap(
         konteks, blokTabel, koordinatXDasar, posisiY,
         batasLebar, jarakBaris, Skala, konteks.fillStyle, ekstraPaddingTabel,
-        ukuranFontInput, jumlahCoretanInput
+        ukuranFontInput, jumlahCoretanInput, levelDrift, levelOvershoot, levelWobble
       );
 
       // Skip baris-baris yang sudah dikonsumsi sebagai tabel
@@ -1346,6 +1349,9 @@ function serializePreset() {
     ['geserTinggiTabel',    'angkaTinggiTabel'],
     ['geserOpasitas',       'angkaOpasitas'],
     ['geserSkala',          'angkaSkala'],
+    ['geserDrift',          'angkaDrift'],
+    ['geserOvershoot',      'angkaOvershoot'],
+    ['geserWobble',         'angkaWobble'],
   ];
 
   // Kumpulkan nilai dari semua slider
@@ -1475,6 +1481,9 @@ function deserializePreset(data) {
       'geserTinggiTabel':    'angkaTinggiTabel',
       'geserOpasitas':       'angkaOpasitas',
       'geserSkala':          'angkaSkala',
+      'geserDrift':          'angkaDrift',
+      'geserOvershoot':      'angkaOvershoot',
+      'geserWobble':         'angkaWobble',
     };
 
     Object.entries(data.sliders).forEach(([sliderId, nilai]) => {
