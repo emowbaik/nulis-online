@@ -21,6 +21,12 @@ const faqContent = `
         <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #2ecc71; margin-bottom: 4px; font-weight: bold;">🧠 Penyesuaian Kolom Cerdas</div>
         <div style="font-size: 13px; color: #ccc;">Menambah kolom? Garis lama <strong style="color: #2ecc71;">tidak akan ter-reset!</strong> Sistem hanya menambahkan garis baru di sisi kanan. Mengurangi? Garis paling kanan dihapus. Kalibrasi lama Anda aman.</div>
       </div>
+
+      <!-- Fitur 4: Save/Load Preset -->
+      <div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 12px; border-left: 3px solid #4a90d9;">
+        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #4a90d9; margin-bottom: 4px; font-weight: bold;">💾 Simpan & Muat Preset</div>
+        <div style="font-size: 13px; color: #ccc;">Sudah susah payah kalibrasi 10 menit? <strong style="color: #4a90d9;">Simpan ke file .json!</strong> Lain kali tinggal muat file tersebut dan semua slider, kalibrasi, font, serta tinta langsung kembali seperti sedia kala.</div>
+      </div>
     </div>
   </div>
 
@@ -93,6 +99,32 @@ const faqContent = `
 
   <hr style="border: none; border-top: 1px solid var(--border); margin: 20px 0;">
 
+  <!-- ═══════ SECTION: PRESET ═══════ -->
+  <h3>💾 Simpan & Muat Preset Konfigurasi</h3>
+  <p>Fitur ini memungkinkan Anda menyimpan <strong>seluruh pengaturan</strong> (kalibrasi area, kalibrasi tabel, slider presisi, font, warna tinta, resolusi kanvas) ke dalam satu file <code>.json</code> kecil. File ini bisa disimpan di laptop/HP Anda dan dimuat ulang kapan saja.</p>
+
+  <h4 style="margin-top: 15px; color: #d4a44c;">💾 Cara Menyimpan Preset:</h4>
+  <ol style="margin-top: 5px;">
+    <li>Pastikan Anda sudah selesai melakukan kalibrasi dan mengatur semua slider sesuai kebutuhan.</li>
+    <li>Scroll ke bawah sidebar, klik tombol <strong>💾 Simpan Preset</strong> (warna emas).</li>
+    <li>File <code>NulisOnline_Preset_DDMMYYYY.json</code> akan otomatis terunduh ke perangkat Anda.</li>
+    <li>Simpan file tersebut di folder tugas Anda agar mudah ditemukan.</li>
+  </ol>
+
+  <h4 style="margin-top: 15px; color: #4a90d9;">📂 Cara Memuat Preset:</h4>
+  <ol style="margin-top: 5px;">
+    <li>Buka NulisOnline dan <strong>unggah/pilih kertas</strong> yang sesuai terlebih dahulu.</li>
+    <li>Klik tombol <strong>📂 Muat Preset</strong> (warna biru) di sidebar.</li>
+    <li>Pilih file <code>.json</code> yang pernah Anda simpan sebelumnya.</li>
+    <li>Semua slider, kalibrasi, font, dan warna tinta langsung terpasang otomatis!</li>
+  </ol>
+
+  <div style="background: rgba(255,140,0,0.1); border: 1px solid rgba(255,140,0,0.3); border-radius: 6px; padding: 10px 12px; margin: 10px 0; font-size: 12px; color: #ff8c00;">
+    ⚠️ <strong>Penting:</strong> File preset <strong>tidak menyimpan gambar kertas</strong> (terlalu besar). Anda harus mengunggah ulang gambar kertas terlebih dahulu, baru memuat preset agar koordinat kalibrasi langsung terpasang di posisi yang tepat.
+  </div>
+
+  <hr style="border: none; border-top: 1px solid var(--border); margin: 20px 0;">
+
   <!-- ═══════ SECTION: FAQ ═══════ -->
   <h3>💡 FAQ & Tips Rahasia</h3>
   <ul>
@@ -135,6 +167,14 @@ const faqContent = `
     <li>
       <strong>🔄 Bagaimana cara me-reset pengaturan tabel?</strong><br>
       Cukup ubah <strong>Jumlah Kolom</strong> di sidebar menjadi <strong>0</strong>. Semua memori garis tabel akan dihapus total dan fitur kalibrasi dinonaktifkan.
+    </li>
+    <li>
+      <strong>💾 Apa saja yang tersimpan di file preset (.json)?</strong><br>
+      Seluruh koordinat kalibrasi (header kiri/kanan, konten), posisi garis tabel, nilai semua slider (Y-offset, spasi, opacity, font size, padding tabel, skala), jenis font, warna tinta, dan resolusi kanvas. Yang <strong>tidak</strong> disimpan: gambar kertas dan isi teks tulisan.
+    </li>
+    <li>
+      <strong>💾 Saya memuat preset tapi tulisan tidak sejajar dengan kertas?</strong><br>
+      Pastikan Anda sudah memilih/mengunggah <strong>kertas yang sama</strong> dengan saat preset dibuat. File preset hanya menyimpan koordinat, bukan gambar kertas. Jika kertas berbeda, koordinat kalibrasi tidak akan pas.
     </li>
   </ul>
 `;
