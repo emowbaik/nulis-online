@@ -249,6 +249,22 @@
 
       <div class="sec">
         <button class="dl-btn" onclick="unduhGambar()">⬇ Simpan Hasil (.png)</button>
+
+        <div style="display: flex; gap: 8px; margin-top: 10px;">
+          <button class="dl-btn btn-preset-simpan" onclick="simpanPreset()"
+            style="flex: 1; background: linear-gradient(135deg, #d4a44c, #b8860b); font-size: 12px; padding: 10px;">
+            💾 Simpan Preset
+          </button>
+          <button class="dl-btn btn-preset-muat" onclick="muatPreset()"
+            style="flex: 1; background: linear-gradient(135deg, #4a90d9, #357abd); font-size: 12px; padding: 10px;">
+            📂 Muat Preset
+          </button>
+        </div>
+
+        <div
+          style="margin-top: 8px; font-size: 10px; color: var(--muted); line-height: 1.4; text-align: center;">
+          Simpan seluruh pengaturan (kalibrasi, slider, font) ke file .json untuk digunakan di lain waktu.
+        </div>
       </div>
 
     </aside>

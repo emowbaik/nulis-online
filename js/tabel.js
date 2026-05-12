@@ -429,15 +429,21 @@ function gambarGridTabel(ctx, dimensi, posisiXAwal, posisiYAwal, Skala, warnaTin
 
 /* ============================================================================
   FUNGSI RENDERING ISI SEL
-  Mengisi setiap sel tabel dengan teks (multi-line jika di-wrap).
+  Mengisi setiap sel tabel dengan teks (top-aligned).
+  Semua sel di baris yang sama memulai teks dari Y yang IDENTIK,
+  yaitu tepat di garis atas baris tersebut (Whitespace Ignorance).
 ============================================================================ */
 
 /**
  * Mengisi setiap sel tabel dengan teks.
+ * Strategi Y-Axis: TOP-ANCHORED (bukan center).
+ * Teks selalu "menggantung" dari garis batas atas sel.
+ * Sisa ruang kosong di bawah dibiarkan bolong (Whitespace Ignorance).
+ *
  * @param {CanvasRenderingContext2D} ctx
  * @param {{lebarKolom: number[], tinggiPerBaris: number[], barisPerSel: string[][][]}} dimensi
  * @param {number} posisiXAwal
- * @param {number} posisiYAwal
+ * @param {number} posisiYAwal - Y absolut baris pertama tabel
  * @param {number} jarakBaris
  * @param {number} Skala
  * @param {number} ekstraPadding - Padding vertikal tambahan dari slider
@@ -455,15 +461,12 @@ function gambarIsiSelTabel(ctx, dimensi, posisiXAwal, posisiYAwal, jarakBaris, S
       const barisTeksSel = barisPerSel[r][c]; // string[] (baris-baris teks dalam sel)
       const xTeks = xKolom + PADDING_X;
 
-      // Posisi Y teks: teks di-center secara vertikal di dalam sel.
-      // ekstraPadding/2 menggeser teks ke bawah agar tetap di tengah
-      // meskipun kotak sel membesar karena slider padding.
-      const tinggiIsiTeks = barisTeksSel.length * jarakBaris;
-      const tinggiSel = tinggiPerBaris[r];
-      const offsetSentering = (tinggiSel - tinggiIsiTeks) / 2;
+      // ── TOP-ANCHORED Y: Semua sel mulai dari Y yang sama ──
+      // Tidak ada offsetSentering. Teks dimulai tepat dari garis atas baris.
+      // Ruang kosong di bawah teks pendek dibiarkan bolong (Whitespace Ignorance).
 
       for (let w = 0; w < barisTeksSel.length; w++) {
-        const yTeks = yBaris + offsetSentering + (w * jarakBaris);
+        const yTeks = yBaris + (w * jarakBaris);
 
         // Jitter vertikal (realisme tangan manusia)
         const jitterY = (Math.random() - 0.5) * (2 * Skala);

@@ -1315,3 +1315,252 @@ function ubahZoom(delta, reset = false) {
     elemenKanvas.style.height = 'auto'; // Tinggi otomatis proporsional
   }
 }
+
+/* ============================================================================
+7. SISTEM PRESET — SIMPAN & MUAT KONFIGURASI (.JSON)
+   Sub-engine 1: State Serializer (Pemaket JSON)
+   Sub-engine 2: State Deserializer (Pemulih Data)
+   Sub-engine 3: File System I/O (Export/Import)
+============================================================================ */
+
+/**
+ * SUB-ENGINE 1: STATE SERIALIZER
+ * Mengumpulkan seluruh state kalibrasi + slider + font + tinta
+ * ke dalam satu objek JavaScript yang siap di-JSON-kan.
+ *
+ * ⚠️ PERINGATAN: Gambar kertas TIDAK disimpan (terlalu besar).
+ *    Hanya menyimpan ID kertas preset jika pengguna memilih dari preset.
+ *
+ * @returns {object} Data preset lengkap
+ */
+function serializePreset() {
+  // Daftar semua pasangan slider (id slider, id angka) yang perlu disimpan
+  const SLIDER_MAP = [
+    ['geserY_Kiri',         'angkaY_Kiri'],
+    ['geserY_Kanan',        'angkaY_Kanan'],
+    ['geserY_Konten',       'angkaY_Konten'],
+    ['geserUkuranFont',     'angkaUkuranFont'],
+    ['geserJumlahCoretan',  'angkaJumlahCoretan'],
+    ['geserSpasi',          'angkaSpasi'],
+    ['geserTinggiTabel',    'angkaTinggiTabel'],
+    ['geserOpasitas',       'angkaOpasitas'],
+    ['geserSkala',          'angkaSkala'],
+  ];
+
+  // Kumpulkan nilai dari semua slider
+  const sliders = {};
+  SLIDER_MAP.forEach(([sliderId]) => {
+    const el = document.getElementById(sliderId);
+    if (el) sliders[sliderId] = parseFloat(el.value);
+  });
+
+  // Kumpulkan resolusi kanvas
+  const resolusi = {
+    lebar: parseInt(document.getElementById('inputLebar').value) || 300,
+    tinggi: parseInt(document.getElementById('inputTinggi').value) || 447,
+    preset: document.getElementById('pilihanPreset').value
+  };
+
+  return {
+    _meta: {
+      versi: '1.0',
+      aplikasi: 'NulisOnline',
+      tanggal: new Date().toISOString()
+    },
+    kalibrasi: JSON.parse(JSON.stringify(Status.kalibrasi)),
+    tabel: {
+      aktif: Status.tabel.aktif,
+      jumlahKolom: Status.tabel.jumlahKolom,
+      garisX: Status.tabel.garisX.slice()
+    },
+    font: {
+      keluarga: Status.keluargaFont,
+      hexTinta: Status.hexTinta
+    },
+    cerminKertas: Status.cerminKertas,
+    resolusi: resolusi,
+    sliders: sliders
+  };
+}
+
+/**
+ * SUB-ENGINE 2: STATE DESERIALIZER
+ * Membongkar data JSON preset dan memulihkan seluruh state + UI.
+ * Secara paksa meng-update nilai slider HTML agar sinkron.
+ *
+ * @param {object} data - Objek preset hasil parse JSON
+ */
+function deserializePreset(data) {
+  if (!data || !data._meta || data._meta.aplikasi !== 'NulisOnline') {
+    alert('❌ File preset tidak valid atau bukan dari NulisOnline.');
+    return false;
+  }
+
+  // ── 1. Pulihkan kalibrasi area ──
+  if (data.kalibrasi) {
+    ['headerKiri', 'headerKanan', 'konten'].forEach(zona => {
+      if (data.kalibrasi[zona]) {
+        Object.assign(Status.kalibrasi[zona], data.kalibrasi[zona]);
+      }
+    });
+  }
+
+  // ── 2. Pulihkan kalibrasi tabel ──
+  if (data.tabel) {
+    Status.tabel.aktif = data.tabel.aktif || false;
+    Status.tabel.jumlahKolom = data.tabel.jumlahKolom || 0;
+    Status.tabel.garisX = (data.tabel.garisX || []).slice();
+
+    // Sinkronkan UI input jumlah kolom
+    const inputKolom = document.getElementById('inputJumlahKolom');
+    const sliderKolom = document.getElementById('geserJumlahKolom');
+    if (inputKolom) inputKolom.value = Status.tabel.jumlahKolom;
+    if (sliderKolom) sliderKolom.value = Status.tabel.jumlahKolom;
+
+    // Enable/disable tombol kalibrasi tabel
+    const btnToggle = document.getElementById('btnToggleKalibrasiTabel');
+    if (btnToggle) btnToggle.disabled = (Status.tabel.jumlahKolom < 1);
+  }
+
+  // ── 3. Pulihkan font & tinta ──
+  if (data.font) {
+    if (data.font.keluarga) {
+      Status.keluargaFont = data.font.keluarga;
+      // Aktifkan tombol font yang sesuai (jika ada)
+      document.querySelectorAll('.font-btn').forEach(btn => {
+        btn.classList.toggle('aktif', btn.dataset.font === data.font.keluarga);
+      });
+    }
+    if (data.font.hexTinta) {
+      Status.hexTinta = data.font.hexTinta;
+      const warnaPicker = document.getElementById('warnaTinta');
+      if (warnaPicker) warnaPicker.value = data.font.hexTinta;
+    }
+  }
+
+  // ── 4. Pulihkan cermin kertas ──
+  if (typeof data.cerminKertas === 'boolean') {
+    Status.cerminKertas = data.cerminKertas;
+    const cbCermin = document.getElementById('cbCermin');
+    if (cbCermin) cbCermin.checked = data.cerminKertas;
+  }
+
+  // ── 5. Pulihkan resolusi kanvas ──
+  if (data.resolusi) {
+    const elLebar = document.getElementById('inputLebar');
+    const elTinggi = document.getElementById('inputTinggi');
+    const elPreset = document.getElementById('pilihanPreset');
+
+    if (data.resolusi.preset && elPreset) {
+      elPreset.value = data.resolusi.preset;
+    }
+    if (data.resolusi.lebar && elLebar) elLebar.value = data.resolusi.lebar;
+    if (data.resolusi.tinggi && elTinggi) elTinggi.value = data.resolusi.tinggi;
+
+    // Bangun ulang kanvas dengan ukuran baru
+    if (typeof bangunUlangKanvas === 'function') bangunUlangKanvas();
+  }
+
+  // ── 6. Pulihkan semua slider ──
+  if (data.sliders) {
+    // Peta pasangan: slider → angka
+    const PAIRS = {
+      'geserY_Kiri':         'angkaY_Kiri',
+      'geserY_Kanan':        'angkaY_Kanan',
+      'geserY_Konten':       'angkaY_Konten',
+      'geserUkuranFont':     'angkaUkuranFont',
+      'geserJumlahCoretan':  'angkaJumlahCoretan',
+      'geserSpasi':          'angkaSpasi',
+      'geserTinggiTabel':    'angkaTinggiTabel',
+      'geserOpasitas':       'angkaOpasitas',
+      'geserSkala':          'angkaSkala',
+    };
+
+    Object.entries(data.sliders).forEach(([sliderId, nilai]) => {
+      const elSlider = document.getElementById(sliderId);
+      if (elSlider) elSlider.value = nilai;
+
+      // Sinkronkan pasangan angka
+      const angkaId = PAIRS[sliderId];
+      if (angkaId) {
+        const elAngka = document.getElementById(angkaId);
+        if (elAngka) elAngka.value = nilai;
+      }
+    });
+
+    // Jika skala berubah, bangun ulang kanvas
+    if (data.sliders['geserSkala'] && typeof bangunUlangKanvas === 'function') {
+      bangunUlangKanvas();
+    }
+  }
+
+  // ── 7. Trigger re-render ──
+  jadwalkanGambarUlang();
+  return true;
+}
+
+/**
+ * SUB-ENGINE 3a: FILE EXPORT
+ * Mengubah preset menjadi Blob JSON dan memicu unduhan file.
+ */
+function simpanPreset() {
+  if (Status.modeAplikasi !== 'tulis') {
+    alert('Selesaikan kalibrasi terlebih dahulu!');
+    return;
+  }
+
+  const data = serializePreset();
+  const jsonString = JSON.stringify(data, null, 2);
+  const blob = new Blob([jsonString], { type: 'application/json' });
+
+  // Generate nama file dengan tanggal
+  const now = new Date();
+  const tgl = String(now.getDate()).padStart(2, '0');
+  const bln = String(now.getMonth() + 1).padStart(2, '0');
+  const thn = now.getFullYear();
+  const namaFile = `NulisOnline_Preset_${tgl}${bln}${thn}.json`;
+
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = namaFile;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+/**
+ * SUB-ENGINE 3b: FILE IMPORT
+ * Membuka dialog file picker untuk memilih .json,
+ * lalu membaca dan memulihkan preset.
+ */
+function muatPreset() {
+  if (Status.modeAplikasi !== 'tulis') {
+    alert('Selesaikan kalibrasi terlebih dahulu!');
+    return;
+  }
+
+  // Buat input file sementara (tidak ditambahkan ke DOM)
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+
+  input.addEventListener('change', function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (event) {
+      try {
+        const data = JSON.parse(event.target.result);
+        const berhasil = deserializePreset(data);
+        if (berhasil) {
+          alert('✅ Preset berhasil dimuat!\n\n📂 ' + file.name);
+        }
+      } catch (err) {
+        alert('❌ Gagal membaca file preset.\nPastikan file adalah JSON yang valid.\n\nError: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  input.click();
+}
