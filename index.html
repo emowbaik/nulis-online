@@ -4,10 +4,70 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nulis Online</title>
+
+  <!-- ═══════ PRIMARY SEO ═══════ -->
+  <title>Nulis Online — Ubah Tugas Ketikan Jadi Tulisan Tangan Realistis</title>
+  <meta name="description" content="Tool gratis untuk mengubah teks ketikan menjadi tulisan tangan realistis di kertas folio/A4. Fitur kalibrasi kertas, tabel tulisan tangan, coretan tipe-x, dan simpan preset. Tanpa install!">
+  <meta name="keywords" content="nulis online, tulisan tangan digital, konversi ketikan ke tulisan tangan, tugas tulis tangan, font tulisan tangan, generator tulisan tangan, nugas tool, aplikasi nulis otomatis">
+  <meta name="author" content="emow">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://nulis-online.emow.my.id/">
+
+  <!-- ═══════ OPEN GRAPH / FACEBOOK / WHATSAPP ═══════ -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://nulis-online.emow.my.id/">
+  <meta property="og:title" content="Nulis Online — Ubah Ketikan Jadi Tulisan Tangan Realistis">
+  <meta property="og:description" content="Tool gratis untuk mengubah teks jadi tulisan tangan realistis di kertas folio/A4. Lengkap dengan kalibrasi kertas, tabel, dan coretan tipe-x!">
+  <meta property="og:image" content="https://nulis-online.emow.my.id/img/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="id_ID">
+  <meta property="og:site_name" content="Nulis Online">
+
+  <!-- ═══════ TWITTER CARD ═══════ -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Nulis Online — Ubah Ketikan Jadi Tulisan Tangan">
+  <meta name="twitter:description" content="Tool gratis mengubah teks jadi tulisan tangan realistis di folio/A4. Kalibrasi kertas, tabel, coretan tipe-x!">
+  <meta name="twitter:image" content="https://nulis-online.emow.my.id/img/og-image.png">
+
+  <!-- ═══════ MOBILE & THEME ═══════ -->
+  <meta name="theme-color" content="#1c1914">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- ═══════ FAVICON ═══════ -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+
+  <!-- ═══════ SCHEMA.ORG STRUCTURED DATA ═══════ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Nulis Online",
+    "url": "https://nulis-online.emow.my.id/",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "Any",
+    "description": "Tool gratis mengubah teks ketikan menjadi tulisan tangan realistis di kertas folio atau A4. Mendukung kalibrasi kertas custom, tabel tulisan tangan, dan coretan tipe-x.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "IDR"
+    },
+    "author": {
+      "@type": "Person",
+      "name": "emow"
+    },
+    "inLanguage": "id-ID"
+  }
+  </script>
+
+  <!-- ═══════ FONTS ═══════ -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Kalam:wght@400;700&family=Patrick+Hand&family=Indie+Flower&family=Dancing+Script:wght@400;700&family=Gloria+Hallelujah&family=Shadows+Into+Light&family=Rock+Salt&family=Architects+Daughter&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Quicksand:wght@400;500;600;700&family=Kalam:wght@400;700&family=Patrick+Hand&family=Indie+Flower&family=Dancing+Script:wght@400;700&family=Gloria+Hallelujah&family=Shadows+Into+Light&family=Rock+Salt&family=Architects+Daughter&display=swap"
     rel="stylesheet">
 
   <link rel="stylesheet" href="css/style.css">
@@ -246,8 +306,29 @@
         <div class="sec-title">📐 Resolusi Kanvas</div>
         <div class="field"><label>Preset Kertas</label>
           <select id="pilihanPreset" onchange="terapkanPreset()">
-            <option value="300x447">Folio (300×447)</option>
-            <option value="595x842">A4 (595×842)</option>
+            <optgroup label="── Folio ──">
+              <option value="300x447">Folio Kecil (300×447)</option>
+              <option value="420x595">Folio Standar (420×595)</option>
+              <option value="590x840">Folio Besar (590×840)</option>
+            </optgroup>
+            <optgroup label="── ISO A Series ──">
+              <option value="744x1052">A3 (744×1052)</option>
+              <option value="595x842">A4 (595×842)</option>
+              <option value="420x595">A5 (420×595)</option>
+              <option value="298x420">A6 (298×420)</option>
+            </optgroup>
+            <optgroup label="── US Letter ──">
+              <option value="612x792">US Letter (612×792)</option>
+              <option value="612x1008">US Legal (612×1008)</option>
+            </optgroup>
+            <optgroup label="── Buku Tulis ──">
+              <option value="350x500">Buku Tulis Kecil (350×500)</option>
+              <option value="480x680">Buku Tulis Standar (480×680)</option>
+            </optgroup>
+            <optgroup label="── Square ──">
+              <option value="400x400">Square Kecil (400×400)</option>
+              <option value="500x500">Square Standar (500×500)</option>
+            </optgroup>
           </select>
         </div>
         <div style="display:flex;gap:6px" class="field">
@@ -267,10 +348,22 @@
         <div class="field" style="margin-top: 15px;">
           <label>Zoom Preview Kanvas</label>
           <div class="zoom-grup">
-            <button class="zoom-btn" onclick="ubahZoom(-0.25)">➖ Out</button>
-            <div id="labelZoom" class="zoom-label">100%</div>
-            <button class="zoom-btn" onclick="ubahZoom(0.25)">➕ In</button>
-            <button class="zoom-btn" onclick="ubahZoom(0, true)">Reset</button>
+            <button class="zoom-btn" onclick="ubahZoom(-0.25)" title="Perkecil">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            </button>
+            <input
+              type="number"
+              id="labelZoom"
+              class="zoom-label"
+              value="100"
+              min="50" max="400" step="25"
+              title="Ketik % zoom lalu tekan Enter"
+              onchange="ubahZoomDariInput(this.value)"
+            >
+            <button class="zoom-btn" onclick="ubahZoom(0.25)" title="Perbesar">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            </button>
+            <button class="zoom-btn zoom-btn-reset" onclick="ubahZoom(0, true)" title="Reset Zoom">↺</button>
           </div>
         </div>
       </div>
@@ -300,7 +393,12 @@
     <div class="canvas-wrap">
       <canvas id="myCanvas"></canvas>
     </div>
-    <button class="btn-bantuan" onclick="bukaModal()">?</button>
+    <button class="btn-bantuan" onclick="bukaModal()" title="Panduan & FAQ">
+      <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+      </svg>
+    </button>
 
     <div class="modal-overlay" id="modalBantuan" onclick="tutupModalLuar(event)">
       <div class="modal-konten">

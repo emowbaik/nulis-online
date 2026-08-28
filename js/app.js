@@ -1300,7 +1300,7 @@ function ubahZoom(delta, reset = false) {
     if (tingkatZoom > 4.0) tingkatZoom = 4.0; // Batas maksimal 400%
   }
 
-  document.getElementById('labelZoom').textContent = Math.round(tingkatZoom * 100) + '%';
+  document.getElementById('labelZoom').value = Math.round(tingkatZoom * 100);
 
   // 3. Terapkan perubahan dimensi
   if (tingkatZoom === 1.0) {
@@ -1318,6 +1318,15 @@ function ubahZoom(delta, reset = false) {
     elemenKanvas.style.width = (lebarVisualDasar * tingkatZoom) + 'px';
     elemenKanvas.style.height = 'auto'; // Tinggi otomatis proporsional
   }
+}
+
+// Dipanggil saat pengguna mengetik langsung di field persen zoom
+function ubahZoomDariInput(nilai) {
+  const persen = parseInt(nilai);
+  if (isNaN(persen)) return;
+  const target = Math.max(0.5, Math.min(4.0, persen / 100));
+  const delta = target - tingkatZoom;
+  ubahZoom(delta);
 }
 
 /* ============================================================================
